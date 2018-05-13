@@ -37,7 +37,6 @@ class Character(data.Dataset):
             idx = idx % len(self.symbol_train)
             image = imageio.imread(self.symbol_train[idx])
 
-
     def __len__(self):
         if not self.train:
             return self.list_len_train - self.split
