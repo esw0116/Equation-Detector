@@ -1,10 +1,14 @@
 import os
 import imageio
 import glob
+import numpy as np
 from sklearn.model_selection import train_test_split
 
 import torch
 import torch.utils.data as data
+from torchvision import transforms
+
+from data import common
 
 
 class Character(data.Dataset):
@@ -19,26 +23,36 @@ class Character(data.Dataset):
         self.train = train
         self.apath = os.path.join(self.args.dir_data, self.args.data_name)
         self.symbols_list = sorted(glob.glob(os.path.join(self.apath, '**/*.png'), recursive=True))
-        self.class_list = sorted(glob.glob(os.path.join(self.apath, '*/')))
+        self.class_list = sorted(os.path.basename(glob.glob(os.path.join(self.apath, '*/'))))
         assert len(self.class_list) == 82
         self.labels_list = _get_class_index(self.symbols_list, self.class_list)
-
         self.symbol_train, self.symbol_test, self.label_train, self.label_test = \
             train_test_split(self.symbols_list, self.labels_list, test_size=0.1, random_state=self.args.seed)
+        self.class_dict = dict()
+        for i in range(len(self.class_list)):
+            temp = np.zeros((len(self.class_list), 1))
+            self.class_dict[self.class_list[i]] = np.put(temp, i, 1)
 
     def __getitem__(self, idx):
         if not self.train:
-            image = imageio.imread()
-            # fname, _ = os.path.splitext(os.path.split(self.int_list_test[idx])[-1])
-            fname, _ = os.path.splitext(os.path.split(self.int_list_train[idx+self.split])[-1])
-            return [common.np2Tensor([a, b, c, d, e], self.args.rgb_range), fname]
+            image = imageio.imread(self.symbol_test[idx])
+            image = common.preprocess(image)
+            image = common.rand_place(image)
+            image = transforms.ToTensor(image)
+            label = self.class_dict[self.label_test[idx]]
+            return image, label
 
         else:
             idx = idx % len(self.symbol_train)
             image = imageio.imread(self.symbol_train[idx])
+            image = common.preprocess(image)
+            image = common.rand_place(image)
+            image = transforms.ToTensor(image)
+            label = self.class_dict[self.label_train[idx]]
+            return image, label
 
     def __len__(self):
         if not self.train:
-            return self.list_len_train - self.split
+            return len(self.symbol_test)
         else:
             return self.args.batch_size * self.args.num_batches
