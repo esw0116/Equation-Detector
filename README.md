@@ -18,3 +18,4 @@ put the equation image to the model and compare the feature.
 
 3. Use LSTM to train the order of the symbols.
 
+Default input image size 448 * 96

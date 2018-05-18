@@ -7,7 +7,7 @@ from importlib import import_module
 
 
 class model:
-    def __init__(self, args, ckp):
+    def __init__(self, args): #, ckp):
         self.args = args
         self.module = import_module('model.'+args.model)
         print('Making model...')
@@ -20,7 +20,7 @@ class model:
             if self.args.n_GPUs > 1:
                 self.model = nn.DataParallel(self.model, range(0, args.n_GPUs))
 
-        self.load(ckp.log_dir, args.pre_train, args.resume, args.no_cuda)
+        #self.load(ckp.log_dir, args.pre_train, args.resume, args.no_cuda)
 
         if self.args.print_model:
             print(self.model)

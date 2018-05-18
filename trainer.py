@@ -4,9 +4,6 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.autograd import Variable
-from torchvision.transforms import functional as F
-from torchvision import transforms, utils
 import tqdm
 
 from option import args
@@ -15,9 +12,9 @@ from model import model
 
 
 class Trainer:
-    def __init__(self, args, loader, model, ckp):
+    def __init__(self, args, loader, model): #, ckp):
         self.args = args
-        self.ckp = ckp
+        #self.ckp = ckp
         self.model = model
         self.my_model = self.model.get_model()
         self.loader_train, self.loader_test = loader
@@ -30,7 +27,7 @@ class Trainer:
 
     def train(self):
 
-        loss = nn.BCEWithLogitsLoss()
+        loss = nn.CrossEntropyLoss()
 
         self.my_model.reset()
         self.my_model.train()
@@ -51,7 +48,7 @@ class Trainer:
 
             error = loss(output, labels)
             error.backward()
-            self.ckp.save(self, idx)
+            #self.ckp.save(self, idx)
             self.adaptive_optim.step()
             self.optimizer.step()
 
@@ -66,7 +63,7 @@ class Trainer:
 
             tqdm_loader.set_description("CLoss: {:.4f}, LR: {:10.1e}".format(error, learning_rate))
 
-        self.ckp.plot(loss_list, lr_change)
+        #self.ckp.plot(loss_list, lr_change)
 
     def test(self):
         self.my_model.eval()
@@ -80,6 +77,8 @@ class Trainer:
 
             if labels.argmax() == output.argmax():
                 num_correct += 1
+
+        print(num_correct/idx)
 
 
 if __name__ == '__main__':

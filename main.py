@@ -9,10 +9,11 @@ from model import model
 
 torch.manual_seed(args.seed)
 #checkpoint = logger.logger(args)
-loader = data(args)
-my_model = model(args, checkpoint)
+dataloader = data(args)
+my_model = model(args) #, checkpoint)
+loader = dataloader.get_loader()
 
-t = Trainer(args, loader, my_model, checkpoint)
+t = Trainer(args, loader, my_model) #, checkpoint)
 t.train()
 t.test()
 
