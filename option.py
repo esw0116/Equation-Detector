@@ -7,7 +7,7 @@ parser.add_argument('--work_type', type=str, default='Character', help='Custom/M
 
 # Set GPU environment, Random Seed for Reproducing
 parser.add_argument('--n_threads', type=int, default=2, help='number of threads for data loading')
-parser.add_argument('--no_cuda', action='store_true', help='enables CUDA training')
+parser.add_argument('--cpu_only', action='store_true', help='enables CUDA training')
 parser.add_argument('--n_GPUs', type=int, default=1, help='number of GPUs')
 parser.add_argument('--seed', type=int, default=1, help='random seed')
 
@@ -16,17 +16,12 @@ parser.add_argument('--data_path', type=str, default='./Dataset', help='path of 
 parser.add_argument('--save_path', type=str, default='../../Feature_map', help='path of saving image directory')
 
 parser.add_argument('--test_only', action='store_true', help='test only mode')
-parser.add_argument('--data_name', type=str, default='Symbol', help='Name of Dataset')
-parser.add_argument('--data_range', type=str, default='.', help='range of data')
 
-parser.add_argument('--repeat', type=int, default=2, help='number of iterations')
 parser.add_argument('--batch_size', type=int, default=16, help='input batch size for training')
-parser.add_argument('--num_batches', type=int, default=1800, help='Number of batches to run')
-parser.add_argument('--patch_size', type=int, default=0, help='patch size when training')
-parser.add_argument('--rgb_range', type=int, default=1, help='maximum value of RGB')
+parser.add_argument('--num_batches', type=int, default=50000, help='Number of batches to run')
 
-parser.add_argument('--learning_rate', type=float, default=0.001, help='Base learning rate for Adam')
-parser.add_argument('--decay_step', type=int, default=600, help='Lr decay Step')
+parser.add_argument('--learning_rate', type=float, default=0.002, help='Base learning rate for Adam')
+parser.add_argument('--decay_step', type=int, default=2000, help='Lr decay Step')
 parser.add_argument('--gamma', type=float, default=0.5, help='Lr decay gamma')
 parser.add_argument('--l_only', action='store_true', help='use only Y channel')
 

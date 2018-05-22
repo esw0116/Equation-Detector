@@ -7,20 +7,19 @@ from importlib import import_module
 
 
 class model:
-    def __init__(self, args): #, ckp):
-        self.args = args
-        self.module = import_module('model.'+args.model)
+    def __init__(self, args, ckp):
         print('Making model...')
-        self.model = self.module.make_model(args)
-        if not self.args.no_cuda:
-            print('CUDA is ready!')
-            torch.cuda.manual_seed(args.seed)
-            self.model.cuda()
 
-            if self.args.n_GPUs > 1:
-                self.model = nn.DataParallel(self.model, range(0, args.n_GPUs))
+        self.args = args
+        self.ckp = ckp
+        self.device = torch.device('cpu' if args.cpu_only else 'cuda')
+        self.module = import_module('model.'+args.model.lower())
+        self.model = self.module.make_model(args).to(self.device)
 
-        #self.load(ckp.log_dir, args.pre_train, args.resume, args.no_cuda)
+        if not args.cpu_only and self.args.n_GPUs > 1:
+            self.model = nn.DataParallel(self.model, range(args.n_GPUs))
+
+        self.load(ckp.log_dir, args.pre_train, args.resume, args.cpu_only)
 
         if self.args.print_model:
             print(self.model)
@@ -50,23 +49,9 @@ class model:
                 os.path.join(apath, 'model', 'model_best.pt')
             )
 
-    def load(self, apath, pre_train='.', resume=False, cpu=False):
+    def load(self, apath, cpu=False):
         if cpu:
             kwargs = {'map_location': lambda storage, loc: storage}
         else:
             kwargs = {}
-
-        if resume:
-            self.get_model().load_state_dict(
-                torch.load(
-                    os.path.join(apath, 'model', 'model_latest.pt'),
-                    **kwargs
-                ),
-                strict=False
-            )
-        else:
-            if pre_train != '.':
-                print('Loading model from {}'.format(pre_train))
-                self.get_model().load_state_dict(
-                    torch.load(pre_train, **kwargs),
-                    strict=False)
+        self.get_model().load_state_dict(torch.load(os.path.join(apath, 'model', 'model_latest.pt'), **kwargs), strict=False )

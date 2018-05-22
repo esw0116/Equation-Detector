@@ -12,13 +12,13 @@ from model import model
 
 
 class Trainer:
-    def __init__(self, args, loader, model): #, ckp):
+    def __init__(self, args, loader, model, ckp):
         self.args = args
-        #self.ckp = ckp
+        self.ckp = ckp
         self.model = model
         self.my_model = self.model.get_model()
         self.loader_train, self.loader_test = loader
-        self.device = torch.device('cpu' if args.no_cuda else 'cuda')
+        self.device = torch.device('cpu' if args.cpu_only else 'cuda')
 
     def optimize(self):
         self.optimizer = optim.Adam(self.model.get_model().parameters(), lr=self.args.learning_rate)

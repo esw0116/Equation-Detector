@@ -21,7 +21,7 @@ class Character(data.Dataset):
             return labels_list
         self.args = args
         self.train = train
-        self.apath = os.path.join(self.args.data_path, self.args.data_name)
+        self.apath = os.path.join(self.args.data_path, 'Symbol')
         self.symbols_list = sorted(glob.glob(os.path.join(self.apath, '**/*.jpg'), recursive=True))
         self.class_list = ([_path.split('/')[-2] for _path in glob.glob(os.path.join(self.apath, '*/'))])
         assert len(self.class_list) == 82
@@ -33,7 +33,6 @@ class Character(data.Dataset):
             temp = np.zeros((len(self.class_list)))
             temp[i] = 1
             self.class_dict[i] = temp
-        #print(self.class_dict)
 
     def __getitem__(self, idx):
         if not self.train:
