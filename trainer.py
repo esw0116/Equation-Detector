@@ -35,7 +35,7 @@ class Trainer:
         for idx, (img, label) in enumerate(tqdm_loader):
             self.optimizer.zero_grad()
 
-            images = img.to(self.device)
+            images = img.to(torch.float).to(self.device)
             labels = label.to(self.device)
             output = self.my_model(images)
 
@@ -56,7 +56,7 @@ class Trainer:
 
             tqdm_loader.set_description("CLoss: {:.4f}, LR: {:10.1e}".format(error, learning_rate))
 
-        #self.ckp.plot(loss_list, lr_change)
+        self.ckp.plot(loss_list, lr_change)
 
     def test(self):
         self.my_model.eval()

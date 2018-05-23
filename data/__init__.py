@@ -12,7 +12,7 @@ class data:
         self.args = args
         self.kwargs = {}
         if not args.cpu_only:
-            self.kwargs['num_workers'] = 10
+            self.kwargs['num_workers'] = 0
             self.kwargs['pin_memory'] = True
 
     def get_loader(self):

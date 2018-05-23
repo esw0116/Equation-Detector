@@ -49,9 +49,7 @@ class Character(data.Dataset):
             image = common.preprocess(image)
             image = common.rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
-            #print(self.label_train[idx])
             label = self.label_train[idx]
-            #label = torch.from_numpy(self.class_dict[self.label_train[idx]]).type('torch.LongTensor')
             return image, label
 
     def __len__(self):
