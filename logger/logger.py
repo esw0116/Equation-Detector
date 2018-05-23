@@ -51,31 +51,17 @@ class logger:
 
         my_scheduler = lrs.StepLR(my_optimizer, step_size=self.args.lr_decay, gamma=self.args.gamma)
 
-        self.log_training = torch.Tensor()
-        self.log_test = torch.Tensor()
-        if not self.args.test_only:
-            self.log_training = torch.load(self.log_dir + '/log_training.pt')
-            self.log_test = torch.load(self.log_dir + '/log_test.pt')
-
-        resume = self.args.resume
-        if resume == -1:
-            my_model.load_state_dict(
-                torch.load(self.log_dir + '/model/model_lastest.pt'))
-            resume = len(self.log_test)
-        else:
-            my_model.load_state_dict(
-                torch.load(self.log_dir + '/model/model_{}.pt'.format(resume)))
-
+        my_model.load_state_dict(torch.load(self.log_dir + '/model/model_lastest.pt'))
+        '''
         my_loss = torch.load(self.log_dir + '/loss.pt')
         my_optimizer.load_state_dict(
             torch.load(self.log_dir + '/optimizer.pt'))
-
+        '''
         print('Load loss function from checkpoint...')
-        print('Continue from epoch {}...'.format(resume))
 
-        return my_model, my_loss, my_optimizer, my_scheduler
+        return my_model, my_optimizer, my_scheduler
 
-    def save(self, trainer, epoch, is_best=False):
+    def save(self, trainer, is_best=False):
         trainer.model.save(apath=self.log_dir, is_best=is_best)
         # trainer.loss.save(self.log_dir)
         # trainer.loss.plot_loss(self.log_dir, epoch)

@@ -29,7 +29,7 @@ parser.add_argument('--model', type=str, default='baseline', help='Name of model
 parser.add_argument('--print_model', action='store_true', help='print model')
 
 parser.add_argument('--log_dir', type=str, default='./experiment', help='path of pre_trained data')
-parser.add_argument('--resume', action='store_true', help='If true, resume from the latest')
+parser.add_argument('--load', action='store_true', help='load the latest model params')
 parser.add_argument('--pre_train', type=str, default='.', help='path of pre_trained data')
 
 args = parser.parse_args()

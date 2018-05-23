@@ -1,14 +1,9 @@
 import os
 import numpy as np
-import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import tqdm
-
-from option import args
-from data import data
-from model import model
 
 
 class Trainer:
@@ -20,7 +15,6 @@ class Trainer:
         self.loader_train, self.loader_test = loader
         self.device = torch.device('cpu' if args.cpu_only else 'cuda')
 
-    def optimize(self):
         self.optimizer = optim.Adam(self.model.get_model().parameters(), lr=self.args.learning_rate)
         self.adaptive_optim = optim.lr_scheduler.StepLR(self.optimizer, step_size=self.args.decay_step,
                                                         gamma=self.args.gamma)
@@ -31,7 +25,6 @@ class Trainer:
 
         self.my_model.reset()
         self.my_model.train()
-        self.optimize()
 
         avg_loss = 0
         tqdm_loader = tqdm.tqdm(self.loader_train)
@@ -48,7 +41,7 @@ class Trainer:
 
             error = loss(output, labels)
             error.backward()
-            #self.ckp.save(self, idx)
+            self.ckp.save(self, idx)
             self.adaptive_optim.step()
             self.optimizer.step()
 
@@ -79,14 +72,3 @@ class Trainer:
                 num_correct += 1
 
         print(num_correct/idx)
-
-
-if __name__ == '__main__':
-    dataloader = data(args)
-    my_model = model(args).get_model()
-
-    torch.manual_seed(args.seed)
-    loader = dataloader.get_loader(0)
-    t = Trainer(args, my_model, loader)
-    t.train()
-    t.test()
