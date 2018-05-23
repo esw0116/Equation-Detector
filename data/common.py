@@ -14,7 +14,7 @@ def preprocess(img):
     return max - img
 
 
-def rand_place(img, h=96, w=448):
+def rand_place(img, h=96, w=480):
     y, x = img.shape
     max_upscale = min(h/y, w/x)
     min_upscale = 0.5

@@ -18,4 +18,5 @@ put the equation image to the model and compare the feature.
 
 3. Use LSTM to train the order of the symbols.
 
-Default input image size 448 * 96
+Default input image size 96 * 480 \
+INKML images are reshaped to 80 * 448, and will be put in the center of the frame.
