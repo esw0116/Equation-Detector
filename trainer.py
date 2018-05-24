@@ -63,7 +63,7 @@ class Trainer:
 
         num_correct = 0
         for idx, (image, label) in enumerate(self.loader_test):
-            images = image.to(self.device)
+            images = image.to(torch.float).to(self.device)
             labels = label.to(self.device)
             with torch.autograd.no_grad():
                 output = self.my_model(images)

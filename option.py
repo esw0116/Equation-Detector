@@ -16,6 +16,8 @@ parser.add_argument('--data_path', type=str, default='./Dataset', help='path of 
 parser.add_argument('--save_path', type=str, default='../../Feature_map', help='path of saving image directory')
 
 parser.add_argument('--test_only', action='store_true', help='test only mode')
+parser.add_argument('--load', action='store_true', help='load the latest model params')
+parser.add_argument('--load_path', type=str, default='.', help='')
 
 parser.add_argument('--batch_size', type=int, default=8, help='input batch size for training')
 parser.add_argument('--num_batches', type=int, default=50000, help='Number of batches to run')
@@ -29,7 +31,6 @@ parser.add_argument('--model', type=str, default='baseline', help='Name of model
 parser.add_argument('--print_model', action='store_true', help='print model')
 
 parser.add_argument('--log_dir', type=str, default='./experiment', help='path of pre_trained data')
-parser.add_argument('--load', action='store_true', help='load the latest model params')
 parser.add_argument('--pre_train', type=str, default='.', help='path of pre_trained data')
 
 args = parser.parse_args()
