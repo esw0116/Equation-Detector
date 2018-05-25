@@ -2,10 +2,6 @@ import numpy as np
 import pandas as pd
 import imageio
 
-import numpy as np
-import imageio
-
-
 
 def read_inkml(inkml):
     def parse(inkml):
@@ -86,8 +82,6 @@ def read_inkml(inkml):
 
             for i in range(stroke.shape[0]):
                 image[int(red_y + stroke[i, 0]), int(red_x + stroke[i, 1])] = 255
-                
-
                 # Filling only two points is not sufficient, it is too sparse
                 # Need to draw the interpolation coordinate between two consecutive points
                 if i != 0:
@@ -95,7 +89,6 @@ def read_inkml(inkml):
                         interp = np.around((j * stroke[i-1, :] + (10-j) * stroke[i, :])/10)
                         image[int(red_y + interp[0]), int(red_x + interp[1])] = 255
 
-        # imageio.imsave('temp.png', image/255)
         return image
 
     latex, a, b = parse(inkml)
@@ -108,10 +101,9 @@ if __name__ == '__main__':
     latex_labels = []
     image_paths = []
     for i in range(1, 9139):
-        if i%500 == 0:
+        if i % 500 == 0:
             print(i)
         filepath = 'inkml_dataset/' + str(i) + '.inkml'
-        # print(filepath)
         a, b = read_inkml(filepath)
         imagepath = 'inkml_images/' + str(i) + '.png'
         latex_labels.append(a)
