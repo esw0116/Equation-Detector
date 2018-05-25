@@ -70,5 +70,5 @@ class Trainer:
 
             if labels.argmax() == output.argmax():
                 num_correct += 1
-
+        # TODO :
         print(num_correct/idx)

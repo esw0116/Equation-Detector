@@ -15,6 +15,7 @@ my_model = model(args, checkpoint)
 loader = dataloader.get_loader()
 
 t = Trainer(args, loader, my_model, checkpoint)
-t.train()
+if not args.test_only:
+    t.train()
 t.test()
 

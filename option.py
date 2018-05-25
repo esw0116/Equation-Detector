@@ -17,7 +17,7 @@ parser.add_argument('--save_path', type=str, default='../../Feature_map', help='
 
 parser.add_argument('--test_only', action='store_true', help='test only mode')
 parser.add_argument('--load', action='store_true', help='load the latest model params')
-parser.add_argument('--load_path', type=str, default='.', help='')
+parser.add_argument('--load_path', type=str, default='./experiment/20180525_baseline_002', help='load path')
 
 parser.add_argument('--batch_size', type=int, default=8, help='input batch size for training')
 parser.add_argument('--num_batches', type=int, default=50000, help='Number of batches to run')
@@ -25,7 +25,6 @@ parser.add_argument('--num_batches', type=int, default=50000, help='Number of ba
 parser.add_argument('--learning_rate', type=float, default=0.002, help='Base learning rate for Adam')
 parser.add_argument('--decay_step', type=int, default=2000, help='Lr decay Step')
 parser.add_argument('--gamma', type=float, default=0.5, help='Lr decay gamma')
-parser.add_argument('--l_only', action='store_true', help='use only Y channel')
 
 parser.add_argument('--model', type=str, default='baseline', help='Name of model')
 parser.add_argument('--print_model', action='store_true', help='print model')

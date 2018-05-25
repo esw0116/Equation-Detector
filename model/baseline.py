@@ -11,9 +11,13 @@ def make_model(args):
 class baseline(nn.Module):
     def __init__(self, args, conv = common.default_conv):
         super(baseline, self).__init__()
+        # TODO : Change Depth
 
         conv_list = []
-        conv_list.extend([conv(1, 32, 3), nn.ReLU(True)])
+        conv_list.extend([conv(1, 16, 3), nn.ReLU(True)])
+        conv_list.extend([conv(16, 16, 3), nn.ReLU(True)])
+        conv_list.append(nn.MaxPool2d(2))
+        conv_list.extend([conv(16, 32, 3), nn.ReLU(True)])
         conv_list.extend([conv(32, 32, 3), nn.ReLU(True)])
         conv_list.append(nn.MaxPool2d(2))
         conv_list.extend([conv(32, 64, 3), nn.ReLU(True)])
@@ -22,15 +26,12 @@ class baseline(nn.Module):
         conv_list.extend([conv(64, 128, 3), nn.ReLU(True)])
         conv_list.extend([conv(128, 128, 3), nn.ReLU(True)])
         conv_list.append(nn.MaxPool2d(2))
-        conv_list.extend([conv(128, 256, 3), nn.ReLU(True)])
-        conv_list.extend([conv(256, 256, 3), nn.ReLU(True)])
-        conv_list.append(nn.MaxPool2d(2))
-        conv_list.extend([conv(256, 256, 3), nn.ReLU(True)])
-        conv_list.extend([conv(256, 256, 3), nn.ReLU(True)])
+        conv_list.extend([conv(128, 128, 3), nn.ReLU(True)])
+        conv_list.extend([conv(128, 128, 3), nn.ReLU(True)])
         conv_list.append(nn.MaxPool2d(2))
 
         fc_list = []
-        fc_list.extend([nn.Linear(256*3*15, 400), nn.ReLU(True)])
+        fc_list.extend([nn.Linear(128*3*15, 400), nn.ReLU(True)])
         fc_list.append(nn.Linear(400, 82))
 
         self.body_conv = nn.Sequential(*conv_list)
