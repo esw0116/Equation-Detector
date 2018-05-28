@@ -32,14 +32,15 @@ class logger:
 
         self.args = args
         self.today = datetime.datetime.now().strftime('%Y%m%d')
-        self.log_dir = make_dir(args.log_dir)
-        self.log = torch.Tensor()
-        print('Save Directory : {}'.format(self.log_dir))
-        with open(self.log_dir + '/config.txt', 'w') as f:
-            f.write(self.today + '\n\n')
-            for arg in vars(args):
-                f.write('{}: {}\n'.format(arg, getattr(args, arg)))
-            f.write('\n')
+        if not args.test_only:
+            self.log_dir = make_dir(args.log_dir)
+            self.log = torch.Tensor()
+            print('Save Directory : {}'.format(self.log_dir))
+            with open(self.log_dir + '/config.txt', 'w') as f:
+                f.write(self.today + '\n\n')
+                for arg in vars(args):
+                    f.write('{}: {}\n'.format(arg, getattr(args, arg)))
+                f.write('\n')
 
     def load(self):
         my_model = model(self.args).get_model()
@@ -116,7 +117,7 @@ class logger:
         plt.legend()
         for i in range(1, len(aux_data)):
             plt.axvline(aux_data[i], color='r')
-        plt.ylim(0, 0.5)
+        plt.ylim(0, 5)
         _close_figure(fig, '{}/loss_magnified.pdf'.format(self.log_dir))
 
         '''

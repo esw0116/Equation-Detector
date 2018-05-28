@@ -28,10 +28,9 @@ class baseline(nn.Module):
         conv_list.append(nn.MaxPool2d(2))
         conv_list.extend([conv(128, 128, 3), nn.ReLU(True)])
         conv_list.extend([conv(128, 128, 3), nn.ReLU(True)])
-        conv_list.append(nn.MaxPool2d(2))
 
         fc_list = []
-        fc_list.extend([nn.Linear(128*3*15, 400), nn.ReLU(True)])
+        fc_list.extend([nn.Linear(128*6*30, 400), nn.ReLU(True)])
         fc_list.append(nn.Linear(400, 82))
 
         self.body_conv = nn.Sequential(*conv_list)
