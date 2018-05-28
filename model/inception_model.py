@@ -38,10 +38,10 @@ class Inceptionv3(nn.Module):
         self.Conv2d_2 = BasicConv(32, 64, kernel_size = 3, padding = 1)
         self.Conv2d_3 = BasicConv(64, 128, kernel_size = 3, padding = 1)
         self.Conv2d_1x1 = BasicConv(256,128, kernel_size =1)
-
+        self.Max_pool = nn.MaxPool2d(2)
         #Inception Layers
         self.InceptionA = InceptionA(128)
-        self.InceptionB_1 = InceptionB(256)
+        self.InceptionB_1 = InceptionB(192)
         self.InceptionB_2 = InceptionB(256)
 
         # Fully Connected
@@ -53,16 +53,17 @@ class Inceptionv3(nn.Module):
     def forward(self, x):
         out = self.Conv2d_1(x)
         out = self.Conv2d_2(out)
-        out = f.max_pool2d(out, kernel_size = 3, stride = 2)
+        out = self.Max_pool(out)
         out = self.Conv2d_3(out)
         out = self.InceptionA(out)
-        out = f.max_pool2d(out, kernel_size = 3, stride = 2)
+        out = self.Max_pool(out)
         out = self.InceptionB_1(out)
         out = self.InceptionB_2(out)
-        out = f.avg_pool2d(out, kerel_size = 3, stride = 2)
+        
+        out = self.Max_pool(out)
         out = self.Conv2d_1x1(out)
-
-        # FC
+        
+        #FC
         out = out.view(out.size(0), -1)
         out = self.fc1(out)
         out = self.fc2(out)
@@ -93,7 +94,7 @@ class InceptionA(nn.Module):
         self.branch3x3_2 = BasicConv(32, 64, kernel_size = 3, padding = 1)
         self.branch3x3_3 = BasicConv(64, 64, kernel_size = 3, padding = 1)
 
-        self.branch3x3 = BasicConv(in_channels, 32, kernel_size = 3)
+        self.branch3x3 = BasicConv(in_channels, 32, kernel_size = 3, padding = 1)
 
         self.branch_pool = BasicConv(in_channels, 32, kernel_size = 1)
 
@@ -117,11 +118,14 @@ class InceptionB(nn.Module):
 
     def __init__(self, in_channels):
         super(InceptionB, self).__init__()
-        self.branch3x3 = BasicConv(in_channels, 64, kernel_size = 3, stride = 2)
+        self.branch3x3 = BasicConv(in_channels, 64, kernel_size = 3, stride = 2, padding = 1)
         
         self.branch1x1_3x3_1 = BasicConv(in_channels, 32, kernel_size = 1)
         self.branch1x1_3x3_2 = BasicConv(32, 64, kernel_size = 3, padding = 1)
-        self.branch1x1_3x3_3 = BasicConv(64, 64, kernel_size = 3, stride = 2)
+        self.branch1x1_3x3_3 = BasicConv(64, 64, kernel_size = 3, stride = 2, padding = 1)
+
+        self.branch_pool_conv = BasicConv(in_channels, 128, kernel_size =1)
+        self.max_pool = nn.MaxPool2d(2)
 
     def forward(self, x):
         branch3x3 = self.branch3x3(x)
@@ -130,7 +134,8 @@ class InceptionB(nn.Module):
         branch1x1_3x3 = self.branch1x1_3x3_2(branch1x1_3x3)
         branch1x1_3x3 = self.branch1x1_3x3_3(branch1x1_3x3)
 
-        branch_pool = f.max_pool2d(x, kernel_size = 3, stride = 2)
+        branch_pool = self.branch_pool_conv(x)
+        branch_pool = self.max_pool(branch_pool)
 
         outputs = [branch3x3, branch1x1_3x3, branch_pool]
         return torch.cat(outputs, 1)
