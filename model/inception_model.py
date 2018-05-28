@@ -16,13 +16,13 @@ Network Structure:
 Input = 96*480*1
 Conv2d 1: 96*480*32
 Conv2d 2: 96*480*64
-Max Pool 1: 48*240*64
+Conv2d 4 (stride 2, padding 1): 48*240*64
 Conv2d 3: 48*240*128
-Inception A: 48*240*256
-Max Pool 2: 24*120*256
+Inception A: 48*240*192
+Conv2d 5 (stride 2, padding 1): 24*120*192
 Inception B 1: 12*60*256
 Inception B 2: 6*30*256
-Avg Pool 3x3: 3*15*256
+Conv2d 6 (stride 2, padding 1): 3*15*256
 Conv2d 1x1: 3*15*128        Just to match 3*15*128 Output
 
 -------------------------
@@ -37,6 +37,9 @@ class Inceptionv3(nn.Module):
         self.Conv2d_1 = BasicConv(1, 32, kernel_size = 3, padding = 1)
         self.Conv2d_2 = BasicConv(32, 64, kernel_size = 3, padding = 1)
         self.Conv2d_3 = BasicConv(64, 128, kernel_size = 3, padding = 1)
+        self.Conv2d_4 = BasicConv(64, 64, kernel_size = 3, padding = 1, stride = 2)
+        self.Conv2d_5 = BasicConv(192, 192, kernel_size = 3, padding = 1, stride = 2)
+        self.Conv2d_6 = BasicConv(256, 256, kernel_size = 3, padding = 1, stride = 2)
         self.Conv2d_1x1 = BasicConv(256,128, kernel_size =1)
         self.Max_pool = nn.MaxPool2d(2)
         #Inception Layers
@@ -53,14 +56,14 @@ class Inceptionv3(nn.Module):
     def forward(self, x):
         out = self.Conv2d_1(x)
         out = self.Conv2d_2(out)
-        out = self.Max_pool(out)
+        out = self.Conv2d_4(out)
         out = self.Conv2d_3(out)
         out = self.InceptionA(out)
-        out = self.Max_pool(out)
+        out = self.Conv2d_5(out)
         out = self.InceptionB_1(out)
         out = self.InceptionB_2(out)
         
-        out = self.Max_pool(out)
+        out = self.Conv2d_6(out)
         out = self.Conv2d_1x1(out)
         
         #FC
