@@ -60,6 +60,7 @@ target/
 # PyTorch
 *.pt
 *.pdf
+*.jpg
 *.png
 *.txt
 *.swp

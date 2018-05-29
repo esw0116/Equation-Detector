@@ -32,7 +32,9 @@ class CRNN(baseline.baseline, BidirectionalLSTM):
 
     def forward(self, x):
         cnn = self.cnn(x)
-        cnn = cnn.view()
+        B, _, _, _ = cnn.size()
+        cnn = cnn.view(64, B, -1)
+        # LSTM input shape (Sequence length, Batch size, input vector size)
         rnn = self.lstm(cnn)
 
         return rnn

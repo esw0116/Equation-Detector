@@ -1,9 +1,12 @@
 import argparse
+from template import set_template
 
 parser = argparse.ArgumentParser()
+#Template
+parser.add_argument('--template', type=str, default='.', help="load one's template")
 
 # Basic Configuration/ Load a Fixed Configuration
-parser.add_argument('--work_type', type=str, default='Character', help='Custom/Mixture')
+parser.add_argument('--work_type', type=str, default='Character', help='CNN/RNN')
 
 # Set GPU environment, Random Seed for Reproducing
 parser.add_argument('--n_threads', type=int, default=2, help='number of threads for data loading')
@@ -33,3 +36,4 @@ parser.add_argument('--log_dir', type=str, default='./experiment', help='path of
 parser.add_argument('--pre_train', type=str, default='.', help='path of pre_trained data')
 
 args = parser.parse_args()
+set_template(args)

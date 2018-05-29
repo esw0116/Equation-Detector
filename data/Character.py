@@ -40,8 +40,9 @@ class Character(data.Dataset):
             image = common.preprocess(image)
             image = common.rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
-            label = torch.from_numpy(self.class_dict[self.label_test[idx]])
-            return image, label
+            label = torch.from_numpy(self.label_test[idx])
+            filename = self.symbol_test[idx]
+            return filename, image, label
 
         else:
             idx = idx % len(self.symbol_train)

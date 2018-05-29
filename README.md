@@ -22,6 +22,6 @@ Default input image size 96 * 480 \
 INKML images are reshaped to 80 * 448, and will be put in the center of the frame.
 
 ##TODO
-- [ ] Edit loss plot(need to reduce bouncing graph)
+- [x] Edit loss plot(need to reduce bouncing graph)
 - [ ] Implement successfully loading model
 - [ ] Initialize the parameter(Inception)

@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from scipy import misc
+from functools import reduce
 
 import torch
 import torch.optim as optim
@@ -34,13 +35,15 @@ class logger:
         self.today = datetime.datetime.now().strftime('%Y%m%d')
         if not args.test_only:
             self.log_dir = make_dir(args.log_dir)
-            self.log = torch.Tensor()
+            #self.log = torch.Tensor()
             print('Save Directory : {}'.format(self.log_dir))
             with open(self.log_dir + '/config.txt', 'w') as f:
                 f.write(self.today + '\n\n')
                 for arg in vars(args):
                     f.write('{}: {}\n'.format(arg, getattr(args, arg)))
                 f.write('\n')
+        else:
+            self.log_dir = args.load_path
 
     def load(self):
         my_model = model(self.args).get_model()
@@ -67,8 +70,6 @@ class logger:
         # trainer.loss.save(self.log_dir)
         # trainer.loss.plot_loss(self.log_dir, epoch)
         '''
-        self.plot_psnr(epoch)
-        torch.save(self.log, os.path.join(self.log_dir, 'psnr_log.pt'))
         torch.save(
             trainer.optimizer.state_dict(),
             os.path.join(self.log_dir, 'optimizer.pt')
@@ -102,10 +103,19 @@ class logger:
             plt.savefig(filename)
             plt.close(fig)
 
+        def _smooth_data(data, smooth_length):
+            smooth_data = data
+            for i in range(smooth_length, len(data)-smooth_length):
+                tmp_data = data[i-smooth_length:i+smooth_length+1]
+                sum = reduce(lambda a, b: a+b, tmp_data)
+                smooth_data[i] = sum / (1+2*smooth_length)
+            return smooth_data
+
         axis = np.linspace(1, len(data), len(data))
         #label = '{} Loss'.format(loss['type'])
         label = 'Loss'
         fig = _init_figure(label)
+        data = _smooth_data(data, 62)
         plt.plot(axis, data, label=label)
         for i in range(1, len(aux_data)):
             plt.axvline(aux_data[i], color='r')

@@ -62,13 +62,16 @@ class Trainer:
         self.my_model.eval()
 
         num_correct = 0
-        for idx, (image, label) in enumerate(self.loader_test):
-            images = image.to(torch.float).to(self.device)
-            labels = label.to(self.device)
-            with torch.autograd.no_grad():
-                output = self.my_model(images)
+        with open(os.path.join(self.ckp.log_dir, 'result.txt'), 'w') as f:
+            f.write('Testdata, Prediction, Truth')
+            for idx, (fname, image, label) in enumerate(self.loader_test):
+                images = image.to(torch.float).to(self.device)
+                labels = label.to(self.device)
+                with torch.autograd.no_grad():
+                    output = self.my_model(images)
+                f.write('{}, {}, {}'.format(fname, output.argmax(), labels))
+                if labels == output.argmax():
+                    num_correct += 1
 
-            if labels.argmax() == output.argmax():
-                num_correct += 1
-        # TODO :
-        print(num_correct/idx)
+                print(num_correct/idx)
+                f.write('Test Accuracy : {:.4f}'.format(num_correct/idx))
