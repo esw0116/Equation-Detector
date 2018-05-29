@@ -2,6 +2,16 @@ import numpy as np
 import pandas as pd
 import imageio
 
+special_characters = ['(', ')', '\sum', '_', '{', '}', '=', '^', r'\frac', '+', '-', '\cos', '\sin',
+            '\sqrt', r'\forall', '\in', '!', '\cdots', '\int',
+             '\geq', r'\neq', '\infty', '.', '\log', r'\tan', ]
+greek_characters = [r'\theta', '\pi', '\mu', '\sigma', '\lambda', r'\beta', '\gamma', r'\alpha', '\Delta', '\phi',]
+numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+            'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+            'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+omit = ['\Bigg', '\Big', '\left', '\right', '\mbox']
 
 def read_inkml(inkml):
     def parse(inkml):
@@ -91,10 +101,19 @@ def read_inkml(inkml):
 
         return image
 
+
     latex, a, b = parse(inkml)
+    latex = latex.replace("\Bigg", "")
+    latex = latex.replace("\Big", "")
+    latex = latex.replace("\left", "")
+    latex = latex.replace(r"\right", "")
+    latex = latex.replace("\mbox", "")
+    latex = latex.replace("$", "")
+    latex = latex.replace("&gt;", ">")
     image = drawing(a, b)
     image = image.astype('uint8')
     return latex, image
+
 
 
 if __name__ == '__main__':
@@ -103,13 +122,16 @@ if __name__ == '__main__':
     for i in range(1, 9139):
         if i % 500 == 0:
             print(i)
-        filepath = 'inkml_dataset/' + str(i) + '.inkml'
+        filepath = '../Dataset/inkml_dataset/' + str(i) + '.inkml'
         a, b = read_inkml(filepath)
-        imagepath = 'inkml_images/' + str(i) + '.png'
-        latex_labels.append(a)
-        image_paths.append(imagepath)
-        imageio.imsave('inkml_images/'+str(i) + '.png', b)
+        if a != "":
+            imagepath = '../images/' + str(i) + '.png'
+            latex_labels.append(a)
+            image_paths.append(imagepath)
+            imageio.imsave('inkml_images/'+str(i) + '.png', b)
+        else:
+            print("None!!")
     # a, b = read_inkml('CROHME_training_2011/1.inkml')
     dataframe = pd.DataFrame({'image_paths': image_paths, 'latex_labels': latex_labels})
-    dataframe.to_csv('dataset_inkml.csv')
+    dataframe.to_csv('dataset_inkml_1.csv')
     print("Done!")
