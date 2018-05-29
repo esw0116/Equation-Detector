@@ -23,5 +23,9 @@ INKML images are reshaped to 80 * 448, and will be put in the center of the fram
 
 ##TODO
 - [x] Edit loss plot(need to reduce bouncing graph)
-- [ ] Implement successfully loading model
+- [x] Encode the latex code according to the dictionary
+- [ ] Implement loading model from pt file
+- [ ] Add resume functions(Prerequisite : Save optimizer params)
+- [ ] Distinguish CAPITAL letters from small letters in symbol directory
 - [ ] Initialize the parameter(Inception)
+- [ ] Check the encoding algorithm by making a decoder
