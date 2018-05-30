@@ -28,4 +28,6 @@ INKML images are reshaped to 80 * 448, and will be put in the center of the fram
 - [ ] Add resume functions(Prerequisite : Save optimizer params)
 - [ ] Distinguish CAPITAL letters from small letters in symbol directory
 - [ ] Initialize the parameter(Inception)
-- [ ] Check the encoding algorithm by making a decoder
+- [x] Check the encoding algorithm by making a decoder
+- [ ] Keep updating dictionary, check for errors
+- [ ] Create Dataloader for RNN input/output
