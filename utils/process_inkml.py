@@ -106,10 +106,12 @@ def read_inkml(inkml):
     latex = latex.replace("\Bigg", "")
     latex = latex.replace("\Big", "")
     latex = latex.replace("\left", "")
+    latex = latex.replace(r"\rightarrow", r"\to")
     latex = latex.replace(r"\right", "")
     latex = latex.replace("\mbox", "")
     latex = latex.replace("$", "")
     latex = latex.replace("&gt;", ">")
+    latex = latex.replace("\gt", ">")
     image = drawing(a, b)
     image = image.astype('uint8')
     return latex, image

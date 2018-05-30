@@ -8,11 +8,11 @@ letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
             'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
 #temporary
-special_characters_temp = ['(', ')', '\sum', '_', '{', '}', '=', '^', r'\frac', '+', '-', '\cos', '\sin',
-            '\sqrt', r'\forall', '\in', '!', '\cdots', '\int',
-             '\geq', r'\neq', '\infty', '.', '\log', r'\tan', '&', '[', ']', '|', r'\forall', r'\times', '\div', '\ldots', '\pm',
-             '\cdot', r'\arrow', '\lim', '\leq', '\lt']
-greek_characters_temp = [r'\theta', '\pi', '\mu', '\sigma', '\lambda', r'\beta', '\gamma', r'\alpha', '\Delta', '\phi']
+special_characters_temp = ['(', ')', r'\sum', '_', '{', '}', '=', '^', r'\frac', '+', '-', r'\cos', r'\sin',
+            r'\sqrt', r'\forall', r'\in', '!', r'\cdots', r'\int',
+             r'\geq', r'\neq', r'\infty', '.', r'\log', r'\tan', '&', '[', ']', '|', r'\forall', r'\times', r'\div', r'\ldots', 
+             r'\cdot', r'\arrow', r'\lim', r'\leq', r'\lt', '/', "'", ",", r'\to', r"\gt", r"\pm", ">", r'\{', r'\}', r'\exists', r'\prime']
+greek_characters_temp = [r'\theta', r'\pi', r'\mu', r'\sigma', r'\lambda', r'\beta', r'\gamma', r'\alpha', r'\Delta', r'\phi']
 
 characters = []
 characters.extend(special_characters_temp)
@@ -23,6 +23,7 @@ characters.extend(letters)
 # sort and reverse
 characters = sorted(characters, key=len)
 characters = list(reversed(characters))             ## <-------- LEXICON in correct order
+print(characters)
 
 ''' 
 USING ENCODED DATA TO REGENERATE LATEX STRING

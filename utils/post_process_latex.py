@@ -1,21 +1,16 @@
 import numpy as np
 import pandas as pd
 
-special_characters = ['(', ')', 'sum', '_', '{', '}', '=', '^', 'frac', '+', '-', 'cos', 'sin',
-            'sqrt', 'forall', 'in', '!', 'cdots', 'int', 
-             'geq', 'neq', 'infty', '.', 'log', 'tan', '&', '[', ']', '|', 'forall', 'times', 'div', 'ldots', 'pm',
-             'arrow', 'lim', 'cdot', 'leq', 'lt']
-greek_characters = ['theta', 'pi', 'mu', 'sigma', 'lambda','beta', 'gamma', 'alpha', 'Delta', 'phi']
+special_characters = ['(', ')', r'\sum', '_', '{', '}', '=', '^', r'\frac', '+', '-', r'\cos', r'\sin',
+            r'\sqrt', r'\forall', r'\in', '!', r'\cdots', r'\int', 
+             r'\geq', r'\neq', r'\infty', '.', r'\log', r'\tan', '&', '[', ']', '|', r'\forall', r'\times', r'\div', r'\ldots',
+             r'\arrow', r'\lim', r'\cdot', r'\leq', r'\lt', '/' ,"'", ",", r'\to', r'\gt', r'\pm', ">", r'\{', r'\}', r'\exists', r'\prime']
+greek_characters = [r'\theta', r'\pi', r'\mu', r'\sigma', r'\lambda',r'\beta', r'\gamma', r'\alpha', r'\Delta', r'\phi']
 numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
             'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
             'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
-#temporary
-special_characters_temp = ['(', ')', '\sum', '_', '{', '}', '=', '^', r'\frac', '+', '-', '\cos', '\sin',
-            '\sqrt', r'\forall', '\in', '!', '\cdots', '\int',
-             '\geq', r'\neq', '\infty', '.', '\log', r'\tan', '&', '[', ']', '|', r'\forall', r'\times', '\div', '\ldots', '\pm']
-greek_characters_temp = [r'\theta', '\pi', '\mu', '\sigma', '\lambda', r'\beta', '\gamma', r'\alpha', '\Delta', '\phi']
 
 # strings already omitted
 omit = ['Bigg', 'Big', r'\left', r'\right', r'\mbox']
@@ -29,6 +24,7 @@ characters.extend(letters)
 # sort and reverse
 characters = sorted(characters, key=len)
 characters = list(reversed(characters))             ## <-------- LEXICON
+print(characters)
 
 data_csv = pd.read_csv('dataset_inkml_1.csv')
 latex_labels = data_csv['latex_labels']
