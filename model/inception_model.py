@@ -51,7 +51,7 @@ class Inceptionv3(nn.Module):
         self.fc1 = nn.Sequential(
             nn.Linear(5760, 400),
             nn.ReLU())
-        self.fc2 = nn.Linear(400, 82)
+        self.fc2 = nn.Linear(400, 118)
 
     def forward(self, x):
         out = self.Conv2d_1(x)

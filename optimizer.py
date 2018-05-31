@@ -1,8 +1,9 @@
 from torch import optim
 from torch.optim import lr_scheduler as lrs
 
+
 def set_optimizer(args, model):
-    trainable = filter(lambda x : x.requires_grad, model.parameters())
+    trainable = filter(lambda x: x.requires_grad, model.parameters())
     kwargs = dict()
     optimizer_type = optim.Adam
     kwargs['lr'] = args.learning_rate

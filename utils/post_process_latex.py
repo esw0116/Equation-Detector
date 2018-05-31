@@ -1,81 +1,56 @@
 import numpy as np
 import pandas as pd
 
-special_characters = ['(', ')', r'\sum', '_', '{', '}', '=', '^', r'\frac', '+', '-', r'\cos', r'\sin',
-            r'\sqrt', r'\forall', r'\in', '!', r'\cdots', r'\int', 
-             r'\geq', r'\neq', r'\infty', '.', r'\log', r'\tan', '&', '[', ']', '|', r'\forall', r'\times', r'\div', r'\ldots',
-             r'\arrow', r'\lim', r'\cdot', r'\leq', r'\lt', '/' ,"'", ",", r'\to', r'\gt', r'\pm', ">", r'\{', r'\}', r'\exists', r'\prime']
-greek_characters = [r'\theta', r'\pi', r'\mu', r'\sigma', r'\lambda',r'\beta', r'\gamma', r'\alpha', r'\Delta', r'\phi']
-numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-            'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-            'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
+def post_process(args):
+    characters = args.dictionary
+    print(characters)
 
-# strings already omitted
-omit = ['Bigg', 'Big', r'\left', r'\right', r'\mbox']
+    data_csv = pd.read_csv('Dataset/dataset_inkml.csv')
+    latex_labels = data_csv['latex_labels']
+    latex_labels_np = latex_labels.values
 
-characters = []
-characters.extend(special_characters)
-characters.extend(greek_characters)
-characters.extend(numbers)
-characters.extend(letters)
+    removed = []
+    encoded = []
+    original = []
+    for labels in latex_labels_np:
+        labels_removed = labels
+        labels_encoded = labels
+        original.append(labels)
+        indices = []
 
-# sort and reverse
-characters = sorted(characters, key=len)
-characters = list(reversed(characters))             ## <-------- LEXICON
-print(characters)
+        for i, character in enumerate(characters):
+            index = -2  # -1 should only be exit code
+            char_length = len(character)
+            labels_removed = labels_removed.replace(character, "")
+            # labels_encoded = labels_encoded.replace(character, " #" + str(i)+ "# ")
+            while index != -1:
+                if index == -2:
+                    index = labels_encoded.find(character, 0)
+                else:
+                    index = labels_encoded.find(character, index+1)
+                if index != -1:
+                    indices.append([index, i, char_length])
 
-data_csv = pd.read_csv('dataset_inkml_1.csv')
-latex_labels = data_csv['latex_labels']
-latex_labels_np = latex_labels.values
+        removed.append(labels_removed)
+        # encoded.append(labels_encoded)
+        indices_np = np.array(indices)
+        indices_np = indices_np[np.lexsort((indices_np[:, 1], indices_np[:, 0]))]
+        # remove redundancies
+        for idx, char_id, char_len in indices_np:
+            if char_len > 1:
+                for i in range(0, char_len):
+                    delete_rows = np.where(indices_np[:, 0] == idx+i)[0]
+                    for delete in delete_rows:
+                        if indices_np[delete, 1] != char_id:
+                            indices_np[delete] = [-1, -1, -1]
 
-removed = []
-encoded = []
-original = []
-for labels in latex_labels_np:
-    labels_removed = labels
-    labels_encoded = labels
-    original.append(labels)
-    indices = []
-    
-    for i, character in enumerate(characters):
-        index = -2  # -1 should only be exit code
-        char_length = len(character)
-        labels_removed = labels_removed.replace(character, "")
-        # labels_encoded = labels_encoded.replace(character, " #" + str(i)+ "# ")
-        while index!=-1:
-            if index ==-2:
-                index = labels_encoded.find(character, 0)
-            else:
-                index = labels_encoded.find(character, index+1)
-            if index != -1:
-                indices.append([index, i, char_length])
+        indices_np = indices_np[indices_np[:, 0] >= 0]
 
+        encoded_values = indices_np[:, 1]
+        encoded.append(encoded_values)
 
-    removed.append(labels_removed)
-    # encoded.append(labels_encoded)
-    indices_np = np.array(indices)
-    indices_np = indices_np[np.lexsort((indices_np[:,1], indices_np[:,0]))]
-    #remove redundancies
-    for idx, char_id, char_len in indices_np:
-        if char_len > 1:
-            for i in range(0, char_len):
-                delete_rows = np.where(indices_np[:,0]==idx+i)[0]
-                for delete in delete_rows:
-                    if indices_np[delete, 1] != char_id:
-                        indices_np[delete] = [-1, -1, -1]
+    dataframe = pd.DataFrame({'removed': removed, 'encoded': encoded, 'original': original})
+    dataframe.to_csv('Dataset/encoded_dataset.csv')
 
-    indices_np = indices_np[indices_np[:,0]>=0]
-
-    encoded_values = indices_np[:,1]
-    encoded.append(encoded_values)
-
-     
-
-
-dataframe = pd.DataFrame({'removed': removed, 'encoded': encoded, 'original': original})
-
-dataframe.to_csv('encoded_dataset.csv')
-
-#TODO REMOVE REDUNDANCIES!
+    #TODO: REMOVE REDUNDANCIES!

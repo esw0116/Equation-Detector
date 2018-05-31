@@ -19,11 +19,11 @@ parser.add_argument('--data_path', type=str, default='./Dataset', help='path of 
 parser.add_argument('--save_path', type=str, default='../../Feature_map', help='path of saving image directory')
 
 parser.add_argument('--test_only', action='store_true', help='test only mode')
-parser.add_argument('--load', action='store_true', help='load the latest model params')
-parser.add_argument('--load_path', type=str, default='./experiment/20180525_baseline_002', help='load path')
+parser.add_argument('--load_path', type=str, default='20180525_baseline_002', help='load path')
+parser.add_argument('--log_dir', type=str, default='./experiment', help='path of pre_trained data')
 
-parser.add_argument('--batch_size', type=int, default=8, help='input batch size for training')
-parser.add_argument('--num_batches', type=int, default=50000, help='Number of batches to run')
+parser.add_argument('--batch_size', type=int, default=128, help='input batch size for training')
+parser.add_argument('--num_epochs', type=int, default=5, help='Number of batches to run')
 
 parser.add_argument('--learning_rate', type=float, default=0.002, help='Base learning rate for Adam')
 parser.add_argument('--decay_step', type=int, default=2000, help='Lr decay Step')
@@ -32,8 +32,23 @@ parser.add_argument('--gamma', type=float, default=0.5, help='Lr decay gamma')
 parser.add_argument('--model', type=str, default='baseline', help='Name of model')
 parser.add_argument('--print_model', action='store_true', help='print model')
 
-parser.add_argument('--log_dir', type=str, default='./experiment', help='path of pre_trained data')
-parser.add_argument('--pre_train', type=str, default='.', help='path of pre_trained data')
+parser.add_argument('--pre_train', type=str, default='.', help='path of pre_trained data if load from other directory')
+parser.add_argument('--dictionary', type=list, default=list(), help='Dictionary of elements')
 
 args = parser.parse_args()
 set_template(args)
+
+specials = ['{', '}', '(', ')', '[', ']', '<', '>', r'\{', r'\}',
+            '+', '-', r'\pm', r'\times', r'\div', '=', r'\neq', r'\leq', r'\geq',
+            '.', '_', '^', '&', '|', '/', "'", ",", '!', r'\prime', r'\frac',
+            r'\cos', r'\sin', r'\tan', r'\log', r'\lim', r'\sqrt', r'\sum', r'\int',
+            r'\cdot', r'\ldots',
+            r'\forall', r'\in', r'\infty', r'\arrow', r'\to', r'\exists']
+greeks = [r'\alpha', r'\beta', r'\gamma', r'\Delta', r'\lambda', r'\theta', r'\pi', r'\mu', r'\sigma', r'\phi']
+numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+           'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+           'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+           'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+args.dictionary = list(sorted(specials+greeks+numbers+letters, key=len, reverse=True))

@@ -18,8 +18,8 @@ class model:
 
         if not args.cpu_only and self.args.n_GPUs > 1:
             self.model = nn.DataParallel(self.model, range(args.n_GPUs))
-        if args.load or args.test_only:
-            self.load(args.load_path, args.cpu_only)
+        if args.load_path != '.':
+            self.load(args.load_path, args.pre_train, args.cpu_only)
 
         if self.args.print_model:
             print(self.model)
@@ -39,19 +39,23 @@ class model:
         if not os.path.exists(os.path.join(apath, 'model')):
             os.makedirs(os.path.join(apath, 'model'))
 
-        torch.save(
-            target.state_dict(),
-            os.path.join(apath, 'model', 'model_latest.pt')
-        )
+        torch.save(target.state_dict(), os.path.join(apath, 'model', 'model_latest.pt'))
         if is_best:
-            torch.save(
-                target.state_dict(),
-                os.path.join(apath, 'model', 'model_best.pt')
-            )
+            torch.save(target.state_dict(), os.path.join(apath, 'model', 'model_best.pt'))
 
-    def load(self, apath, cpu=False):
+    def load(self, apath, pre_train, cpu=False):
         if cpu:
             kwargs = {'map_location': lambda storage, loc: storage}
         else:
             kwargs = {}
-        self.get_model().load_state_dict(torch.load(os.path.join(apath, 'model', 'model_latest.pt'), **kwargs), strict=False )
+
+        if pre_train != '.':
+            print('Load model from : {}'.format(pre_train))
+            self.get_model().load_state_dict(torch.load(pre_train, **kwargs), strict=False)
+        else:
+            if not self.args.test_only:
+                self.get_model().load_state_dict(torch.load(os.path.join(apath, 'model', 'model_latest.pt'), **kwargs),
+                                                 strict=False)
+            else:
+                self.get_model().load_state_dict(torch.load(os.path.join(apath, 'model', 'model_best.pt'), **kwargs),
+                                                 strict=False)

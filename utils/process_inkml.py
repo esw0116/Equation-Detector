@@ -1,17 +1,15 @@
 import numpy as np
 import pandas as pd
 import imageio
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from option import args
+from utils.post_process_latex import post_process
+from utils.check_encoding import check_encoding
 
-special_characters = ['(', ')', '\sum', '_', '{', '}', '=', '^', r'\frac', '+', '-', '\cos', '\sin',
-            '\sqrt', r'\forall', '\in', '!', '\cdots', '\int',
-             '\geq', r'\neq', '\infty', '.', '\log', r'\tan', ]
-greek_characters = [r'\theta', '\pi', '\mu', '\sigma', '\lambda', r'\beta', '\gamma', r'\alpha', '\Delta', '\phi',]
-numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-            'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-            'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+omit = ['\Bigg', '\Big', '\left', r'\right', '\mbox']
 
-omit = ['\Bigg', '\Big', '\left', '\right', '\mbox']
 
 def read_inkml(inkml):
     def parse(inkml):
@@ -22,7 +20,7 @@ def read_inkml(inkml):
         """
         latex = ''
         image_coord = []
-        with open(inkml, 'r', errors = 'ignore') as ink:
+        with open(inkml, 'r', errors='ignore') as ink:
             first = True
             idx = 0
             min_x = 1e6
@@ -49,7 +47,7 @@ def read_inkml(inkml):
                     # coord : [y, x]
                     coord = np.zeros((len(points), 2))
                     for i, p in enumerate(points):
-                        
+
                         x = float(p.split()[0])
                         y = float(p.split()[1])
                         # put y coordinate first
@@ -80,12 +78,13 @@ def read_inkml(inkml):
         len_y = max_y - min_y
 
         scale = min((w-1)/len_x, (h-1)/len_y)
-        
+
         # red_x, red_y : used for centering the image in the frame.(redundant values, at least one should be zero)
         red_x = (w - scale*len_x)//2
         red_y = (h - scale*len_y)//2
 
         image = np.zeros((h, w))
+
         for stroke in coord:
             stroke[:, 0] = np.around((stroke[:, 0] - min_y) * scale)
             stroke[:, 1] = np.around((stroke[:, 1] - min_x) * scale)
@@ -95,12 +94,13 @@ def read_inkml(inkml):
                 # Filling only two points is not sufficient, it is too sparse
                 # Need to draw the interpolation coordinate between two consecutive points
                 if i != 0:
-                    for j in range(1, 10):
-                        interp = np.around((j * stroke[i-1, :] + (10-j) * stroke[i, :])/10)
+                    l1dist = np.sum(np.abs(stroke[i-1, :] - stroke[i, :]))
+                    interp_factor = int(l1dist // 2) + 5
+                    for j in range(1, interp_factor):
+                        interp = np.around((j * stroke[i-1, :] + (interp_factor-j) * stroke[i, :])/interp_factor)
                         image[int(red_y + interp[0]), int(red_x + interp[1])] = 255
 
         return image
-
 
     latex, a, b = parse(inkml)
     latex = latex.replace("\Bigg", "")
@@ -108,32 +108,72 @@ def read_inkml(inkml):
     latex = latex.replace("\left", "")
     latex = latex.replace(r"\rightarrow", r"\to")
     latex = latex.replace(r"\right", "")
-    latex = latex.replace("\mbox", "")
+    latex = latex.replace("{}", "")
+    for st in [r'\mbox {', r'\hbox {', r'\vtop {', '\mathrm {', r'\mbox{', r'\hbox{', r'\vtop{', '\mathrm{']:
+        while True:
+            cnt = 0
+            idx = latex.find(st)
+            if idx == -1:
+                break
+
+            latex = latex[:idx] + latex[idx + len(st):]
+            while cnt >= 0:
+                i1 = latex.find('{', idx)
+                i2 = latex.find('}', idx)
+                if i1 == -1:
+                    i1 = len(latex)
+                if i2 == -1:
+                    i2 = len(latex)
+                if i1 < i2:
+                    cnt += 1
+                    idx = i1 + 1
+                else:
+                    cnt -= 1
+                    idx = i2 + 1
+            latex = latex[:i2] + latex[i2 + 1:]
+
+    # latex = latex.replace("\mbox", "")
+    # latex = latex.replace(r"\hbox", "")
+    # latex = latex.replace(r"\vtop", "")
+    latex = latex.replace("\mathrm", "")
+    latex = latex.replace(r"\dots", r"\cdots")
+    latex = latex.replace(r"\cdots", r"\ldots")
     latex = latex.replace("$", "")
     latex = latex.replace("&gt;", ">")
     latex = latex.replace("\gt", ">")
+    latex = latex.replace("&lt;", "<")
+    latex = latex.replace("\lt", "<")
+    latex = latex.replace("\lbrack", "[")
+    latex = latex.replace(r"\rbrack", "]")
+    latex = latex.replace("\n", "")
     image = drawing(a, b)
     image = image.astype('uint8')
     return latex, image
 
 
-
 if __name__ == '__main__':
     latex_labels = []
     image_paths = []
-    for i in range(1, 9139):
-        if i % 500 == 0:
+    if not os.path.exists('Dataset/inkml_images'):
+        os.mkdir('Dataset/inkml_images')
+    for i in range(1, 13724):
+        if i % 1000 == 0:
             print(i)
-        filepath = '../Dataset/inkml_dataset/' + str(i) + '.inkml'
+        fname = str('{:05}'.format(i))
+        filepath = 'Dataset/inkml_dataset/' + fname + '.inkml'
         a, b = read_inkml(filepath)
         if a != "":
-            imagepath = '../images/' + str(i) + '.png'
+            imagepath = 'images/' + fname + '.png'
             latex_labels.append(a)
             image_paths.append(imagepath)
-            imageio.imsave('inkml_images/'+str(i) + '.png', b)
+            imageio.imsave('Dataset/inkml_images/' + fname + '.png', b)
         else:
-            print("None!!")
+            print("None!!, {}".format(i))
+
     # a, b = read_inkml('CROHME_training_2011/1.inkml')
     dataframe = pd.DataFrame({'image_paths': image_paths, 'latex_labels': latex_labels})
-    dataframe.to_csv('dataset_inkml_1.csv')
+    dataframe.to_csv('Dataset/dataset_inkml.csv')
     print("Done!")
+
+    post_process(args)
+    check_encoding(args)

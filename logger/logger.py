@@ -6,12 +6,8 @@ from scipy import misc
 from functools import reduce
 
 import torch
-import torch.optim as optim
-import torch.optim.lr_scheduler as lrs
 from torchvision import utils
 from torch.autograd import Variable
-
-from model import model
 
 import matplotlib
 matplotlib.use('Agg')
@@ -24,57 +20,55 @@ class logger:
             i = 1
             while 1:
                 log_dir = os.path.join(base_dir, self.today + '_' + args.model + '_{:03}'.format(i))
-                if os.path.exists(log_dir):
+                if os.path.exists(os.path.join(log_dir, 'model')):
                     i = i + 1
                 else:
+                    if os.path.exists(log_dir):
+                        print('Delete Incomplete Directory...')
+                        os.system('rm -rf ' + log_dir)
                     os.makedirs(log_dir)
                     break
             return log_dir
 
         self.args = args
+        self.loss = self.Loss()
         self.today = datetime.datetime.now().strftime('%Y%m%d')
-        if not args.test_only:
+
+        if args.load_path != '.':
+            self.log_dir = args.log_dir + args.load_path
+            if os.path.exists(os.path.join(self.log_dir, 'model')):
+                print('Load Directory : {}'.format(self.log_dir))
+                self.loss.load(self.log_dir)
+                print('Current Epoch : {}'.format(len(self.loss.log)))
+
+            else:
+                args.load_path = '.'
+
+        if args.load_path == '.':
             self.log_dir = make_dir(args.log_dir)
-            #self.log = torch.Tensor()
+
             print('Save Directory : {}'.format(self.log_dir))
             with open(self.log_dir + '/config.txt', 'w') as f:
                 f.write(self.today + '\n\n')
                 for arg in vars(args):
                     f.write('{}: {}\n'.format(arg, getattr(args, arg)))
                 f.write('\n')
-        else:
-            self.log_dir = args.load_path
 
-    def load(self):
-        my_model = model(self.args).get_model()
-        trainable = filter(lambda x: x.requires_grad, my_model.parameters())
-
-        optimizer = optim.Adam
-        kwargs = {'lr': self.args.learning_rate, 'weight_decay': 0}
-        my_optimizer = optimizer(trainable, **kwargs)
-
-        my_scheduler = lrs.StepLR(my_optimizer, step_size=self.args.lr_decay, gamma=self.args.gamma)
-
-        my_model.load_state_dict(torch.load(self.log_dir + '/model/model_lastest.pt'))
-        '''
-        my_loss = torch.load(self.log_dir + '/loss.pt')
-        my_optimizer.load_state_dict(
-            torch.load(self.log_dir + '/optimizer.pt'))
-        '''
-        print('Load loss function from checkpoint...')
-
-        return my_model, my_optimizer, my_scheduler
-
-    def save(self, trainer, is_best=False):
+    def save(self, trainer, epoch, is_best=False):
         trainer.model.save(apath=self.log_dir, is_best=is_best)
-        # trainer.loss.save(self.log_dir)
-        # trainer.loss.plot_loss(self.log_dir, epoch)
-        '''
-        torch.save(
-            trainer.optimizer.state_dict(),
-            os.path.join(self.log_dir, 'optimizer.pt')
-        )
-        '''
+        self.loss.save(self.log_dir)
+        self.loss.plot_loss(self.log_dir, epoch)
+        torch.save(trainer.optimizer.state_dict(), os.path.join(self.log_dir, 'optimizer.pt'))
+
+    def save_results(self, fname, array):
+        column = ['Testdata', 'Prediction', 'Ground Truth', 'Correct?']
+        df = pd.DataFrame(columns=column)
+        df['Testdata'] = fname
+        df['Prediction'] = array[0]
+        df['Ground Truth'] = array[1]
+        df['Correct?'] = array[2]
+
+        df.to_csv(os.path.join(self.log_dir, 'result.csv'))
 
     def save_img(self, filename, img):
         if not os.path.exists(os.path.join(self.log_dir, 'result_img')):
@@ -91,54 +85,40 @@ class logger:
                 img = np.clip(img, 0, 255)
             misc.imsave(os.path.join(self.log_dir, 'result_img/{}.png'.format(filename)), img)
 
-    def plot(self, data, aux_data):
-        def _init_figure(label):
+    class Loss:
+        def __init__(self):
+            self.log = torch.Tensor()
+            self.lr_ch = []
+            self.result = torch.Tensor()
+
+        def load(self, apath):
+            self.log = torch.load('{}.loss_log.pt'.format(apath))
+            self.result = torch.load('{}.result.pt'.format(apath))
+
+        def save(self, apath):
+            torch.save(self.log, '{}.loss_log.pt'.format(apath))
+            torch.save(self.log, '{}.result.pt'.format(apath))
+
+        def register_loss(self, value):
+            self.log = torch.cat((self.log, value))
+
+        def register_result(self, value):
+            self.result = torch.cat((self.result, value))
+
+        def detect_lr_change(self, epoch):
+            self.lr_ch.append(epoch)
+
+        def plot_loss(self, apath, epoch):
+            axis = np.linspace(1, epoch, epoch)
+            label = 'Loss_Graph'
             fig = plt.figure()
             plt.title(label)
-            plt.xlabel('Iterations')
-            plt.grid(True)
-            return fig
-
-        def _close_figure(fig, filename):
-            plt.savefig(filename)
-            plt.close(fig)
-
-        def _smooth_data(data, smooth_length):
-            smooth_data = data
-            for i in range(smooth_length, len(data)-smooth_length):
-                tmp_data = data[i-smooth_length:i+smooth_length+1]
-                sum = reduce(lambda a, b: a+b, tmp_data)
-                smooth_data[i] = sum / (1+2*smooth_length)
-            return smooth_data
-
-        axis = np.linspace(1, len(data), len(data))
-        #label = '{} Loss'.format(loss['type'])
-        label = 'Loss'
-        fig = _init_figure(label)
-        data = _smooth_data(data, 62)
-        plt.plot(axis, data, label=label)
-        for i in range(1, len(aux_data)):
-            plt.axvline(aux_data[i], color='r')
-        plt.legend()
-        _close_figure(fig, '{}/loss.pdf'.format(self.log_dir))
-
-        fig = _init_figure(label)
-        plt.plot(axis, data, label=label)
-        plt.legend()
-        for i in range(1, len(aux_data)):
-            plt.axvline(aux_data[i], color='r')
-        plt.ylim(0, 5)
-        _close_figure(fig, '{}/loss_magnified.pdf'.format(self.log_dir))
-
-        '''
-        set_name = type(trainer.loader_test.dataset).__name__
-        fig = _init_figure('SR on {}'.format(set_name))
-        for idx_scale, scale in enumerate(self.args.scale):
-            legend = 'Scale {}'.format(scale)
-            plt.plot(axis, test[:, idx_scale].numpy(), label=legend)
+            plt.plot(axis, self.log.numpy(), label=label)
+            for i in range(1, len(self.lr_ch)):
+                plt.axvline(self.lr_ch[i], color='r')
             plt.legend()
-
-        _close_figure(
-            fig,
-            '{}/test_{}.pdf'.format(self.log_dir, set_name))
-        '''
+            plt.xlabel('Epochs')
+            plt.ylabel('Loss')
+            plt.grid(True)
+            plt.savefig('{}/loss.pdf'.format(apath))
+            plt.close(fig)

@@ -33,7 +33,7 @@ class baseline(nn.Module):
 
         fc_list = []
         fc_list.extend([nn.Linear(128*3*15, 400), nn.ReLU(True)])
-        fc_list.append(nn.Linear(400, 82))
+        fc_list.append(nn.Linear(400, 118))
 
         self.body_conv = nn.Sequential(*conv_list)
         self.body_fc = nn.Sequential(*fc_list)

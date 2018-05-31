@@ -17,21 +17,22 @@ class Character(data.Dataset):
             labels_list = []
             for filepath in symbols:
                 class_name = os.path.basename(os.path.dirname(filepath))
-                if class_name == 'dot':
-                    class_name = '.'
-                elif class_name == 'forward_slash':
-                    class_name = '/'
                 labels_list.append(class_list.index(class_name))
             return labels_list
         self.args = args
         self.train = train
         self.apath = os.path.join(self.args.data_path, 'Symbol')
         self.symbols_list = sorted(glob.glob(os.path.join(self.apath, '**/*.jpg'), recursive=True))
-        self.labels_list = _get_class_index(self.symbols_list, self.args.dictionary)
+        self.class_list = ([_path.split('/')[-2] for _path in glob.glob(os.path.join(self.apath, '*/'))])
+        assert len(self.class_list) == 82
+        self.labels_list = _get_class_index(self.symbols_list, self.class_list)
         self.symbol_train, self.symbol_test, self.label_train, self.label_test = \
             train_test_split(self.symbols_list, self.labels_list, test_size=0.1, random_state=self.args.seed)
-        self.label_train = torch.from_numpy(np.asarray(self.label_train, dtype='uint8'))
-        self.label_test = torch.from_numpy(np.asarray(self.label_test, dtype='uint8'))
+        self.class_dict = dict()
+        for i in range(len(self.class_list)):
+            temp = np.zeros((len(self.class_list)))
+            temp[i] = 1
+            self.class_dict[i] = temp
 
     def __getitem__(self, idx):
         if not self.train:
@@ -39,11 +40,12 @@ class Character(data.Dataset):
             image = common.preprocess(image)
             image = common.rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
-            label = self.label_test[idx]
+            label = torch.from_numpy(self.label_test[idx])
             filename = self.symbol_test[idx]
             return filename, image, label
 
         else:
+            idx = idx % len(self.symbol_train)
             image = imageio.imread(self.symbol_train[idx])
             image = common.preprocess(image)
             image = common.rand_place(image)
@@ -55,4 +57,4 @@ class Character(data.Dataset):
         if not self.train:
             return len(self.symbol_test)
         else:
-            return len(self.symbol_train)
+            return self.args.batch_size * self.args.num_batches

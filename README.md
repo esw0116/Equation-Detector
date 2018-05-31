@@ -18,16 +18,22 @@ put the equation image to the model and compare the feature.
 
 3. Use LSTM to train the order of the symbols.
 
+## Miscellaneous
 Default input image size 96 * 480 \
 INKML images are reshaped to 80 * 448, and will be put in the center of the frame.
+
+Test Set for Equation : Testdata in 2014 CHORME(988 items)
+
 
 ## TODO
 - [x] Edit loss plot(need to reduce bouncing graph)
 - [x] Encode the latex code according to the dictionary
-- [ ] Implement loading model from pt file
-- [ ] Add resume functions(Prerequisite : Save optimizer params)
-- [ ] Distinguish CAPITAL letters from small letters in symbol directory
-- [ ] Initialize the parameter(Inception)
 - [x] Check the encoding algorithm by making a decoder
-- [ ] Keep updating dictionary, check for errors
+- [x] Keep updating dictionary, check for errors
+- [x] (Not Tested Yet)Implement loading model from pt file
+- [x] (Not Tested Yet)Save optimizer parameters
+- [x] (Not Tested Yet)Add resume functions
+- [ ] Distinguish CAPITAL letters from small letters in symbol directory
 - [ ] Create Dataloader for RNN input/output
+- [ ] (OPTIONAL) Hierarchical softmax
+- [ ] (OPTIONAL) More data for symbol classification
