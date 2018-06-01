@@ -35,7 +35,7 @@ class logger:
         self.today = datetime.datetime.now().strftime('%Y%m%d')
 
         if args.load_path != '.':
-            self.log_dir = args.log_dir + args.load_path
+            self.log_dir = os.path.join(args.log_dir, args.load_path)
             if os.path.exists(os.path.join(self.log_dir, 'model')):
                 print('Load Directory : {}'.format(self.log_dir))
                 self.loss.load(self.log_dir)
@@ -89,7 +89,7 @@ class logger:
         def __init__(self):
             self.log = torch.Tensor()
             self.lr_ch = []
-            self.result = torch.Tensor()
+            self.result = torch.zeros(1).to(torch.float)
 
         def load(self, apath):
             self.log = torch.load('{}.loss_log.pt'.format(apath))
@@ -100,10 +100,12 @@ class logger:
             torch.save(self.log, '{}.result.pt'.format(apath))
 
         def register_loss(self, value):
-            self.log = torch.cat((self.log, value))
+            self.log = torch.cat((self.log, torch.zeros(1)))
+            self.log[-1] = value
 
         def register_result(self, value):
-            self.result = torch.cat((self.result, value))
+            self.result = torch.cat((self.result, torch.zeros(1)))
+            self.log[-1] = value
 
         def detect_lr_change(self, epoch):
             self.lr_ch.append(epoch)

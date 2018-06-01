@@ -35,7 +35,7 @@ class Trainer_CNN:
         if lr_before != lr_after:
             self.ckp.loss.detect_lr_change(epoch)
 
-        sum_loss = torch.zeros(1)
+        sum_loss = 0
         tqdm_loader = tqdm.tqdm(self.loader_train)
 
         for idx, (img, label) in enumerate(tqdm_loader):
@@ -54,31 +54,32 @@ class Trainer_CNN:
 
             tqdm_loader.set_description("CLoss: {:.4f}, LR: {:10.1e}".format(error, lr_after))
 
-        self.ckp.loss.register_loss(sum_loss.div(len(self.loader_train)))
+        self.ckp.loss.register_loss(sum_loss/len(self.loader_train))
 
     def test(self):
         epoch = self.lr_scheduler.last_epoch + 1
         self.my_model.eval()
-        num_correct = np.zeros(1)
+        num_correct = 0
         fname_list = []
         table = np.zeros((3, len(self.loader_test)))
-        for idx, (fname, image, label) in enumerate(self.loader_test):
+
+        tqdm_loader = tqdm.tqdm(self.loader_test)
+        for idx, (fname, image, label) in enumerate(tqdm_loader):
             images = image.to(torch.float).to(self.device)
             labels = label.to(torch.long).to(self.device)
             with torch.autograd.no_grad():
                 output = self.my_model(images)
             fname_list.append(fname)
-            table[idx, 0:2] = [output.argmax(), labels]
+            table[0:2, idx] = [output.argmax(), labels]
             if labels == output.argmax():
                 num_correct += 1
-                table[idx, 2] = 1
+                table[2, idx] = 1
 
         print('In Epoch {}, Acc is {}'.format(epoch, num_correct/len(self.loader_test)))
-        cur_best = torch.max(self.ckp.loss.result).item()
-        self.ckp.save(self, epoch, is_best=num_correct/len(self.loader_test) > cur_best)
-        self.ckp.loss.register_result(torch.from_numpy(num_correct).div(len(self.loader_test)))
-
-        f.write('Test Accuracy : {:.4f}'.format(num_correct/len(self.loader_test)))
+        if not self.args.test_only:
+            cur_best = torch.max(self.ckp.loss.result).item()
+            self.ckp.loss.register_result(num_correct/len(self.loader_test))
+            self.ckp.save(self, epoch, is_best=num_correct/len(self.loader_test) > cur_best)
 
     def termination(self):
         if self.args.test_only:

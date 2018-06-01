@@ -22,7 +22,7 @@ parser.add_argument('--test_only', action='store_true', help='test only mode')
 parser.add_argument('--load_path', type=str, default='20180525_baseline_002', help='load path')
 parser.add_argument('--log_dir', type=str, default='./experiment', help='path of pre_trained data')
 
-parser.add_argument('--batch_size', type=int, default=128, help='input batch size for training')
+parser.add_argument('--batch_size', type=int, default=256, help='input batch size for training')
 parser.add_argument('--num_epochs', type=int, default=5, help='Number of batches to run')
 
 parser.add_argument('--learning_rate', type=float, default=0.002, help='Base learning rate for Adam')
