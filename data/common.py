@@ -13,6 +13,8 @@ def preprocess(img):
     max = img.max()
     return max - img
 
+def normalize_img(img):
+    return img/255
 
 def rand_place(img, h=96, w=480):
     y, x = img.shape
@@ -30,3 +32,14 @@ def rand_place(img, h=96, w=480):
     palette[randy:randy+after_scale_y, randx:randx+after_scale_x] = img_scaled
 
     return palette
+
+def exp_rand_place(img, h=96, w=480):
+    y, x = img.shape
+    randx = np.random.randint(0, w - x)
+    randy = np.random.randint(0, h - y)
+
+    palette = np.zeros((h, w))
+    palette[randy:randy+y, randx:randx+x] = img
+    
+    return palette
+    

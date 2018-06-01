@@ -7,54 +7,59 @@ from sklearn.model_selection import train_test_split
 import torch
 import torch.utils.data as data
 from torchvision import transforms
+import pandas as pd
 
 from data import common
 
+# csv_file = '../Dataset/
 
-class Character(data.Dataset):
-    def __init__(self, args, train=True):
-        def _get_class_index(symbols, class_list):
-            labels_list = []
-            for filepath in symbols:
-                class_name = os.path.basename(os.path.dirname(filepath))
-                labels_list.append(class_list.index(class_name))
-            return labels_list
+
+class Expression(data.Dataset):
+    def __init__(self, args, train=True, csv_file):
+        csv_data = pd.read_csv(csv_file)
+        encoded = csv_data['encoded']
+        encoded = encoded.values
+        self.encoded_list = []
+        for encoding in encoded:
+            encoding.replace("[", "")
+            encoding.replace("]", "")
+            encoding.replace("\n", "")
+            encoding.split(" ")
+            encoding = np.array(encoding).astype(int)
+            zero_pad = np.zeros(96-len(encoding)).astype(int)
+            zero_pad -= 1
+            encoding = np.append(encoding, zero_pad).astype(int)
+            self.encoded_list.append(encoding)
+
+        self.image_paths = csv_data['image_paths']
+        self.image_paths = self.image_paths.values.tolist()
         self.args = args
         self.train = train
-        self.apath = os.path.join(self.args.data_path, 'Symbol')
-        self.symbols_list = sorted(glob.glob(os.path.join(self.apath, '**/*.jpg'), recursive=True))
-        self.class_list = ([_path.split('/')[-2] for _path in glob.glob(os.path.join(self.apath, '*/'))])
-        assert len(self.class_list) == 82
-        self.labels_list = _get_class_index(self.symbols_list, self.class_list)
-        self.symbol_train, self.symbol_test, self.label_train, self.label_test = \
-            train_test_split(self.symbols_list, self.labels_list, test_size=0.1, random_state=self.args.seed)
-        self.class_dict = dict()
-        for i in range(len(self.class_list)):
-            temp = np.zeros((len(self.class_list)))
-            temp[i] = 1
-            self.class_dict[i] = temp
+        self.expression_train, self.expression_test, self.label_train, self.label_test = \
+            train_test_split(self.encoded_list, self.image_paths, test_size=0.1, random_state=self.args.seed)
 
     def __getitem__(self, idx):
         if not self.train:
-            image = imageio.imread(self.symbol_test[idx])
-            image = common.preprocess(image)
-            image = common.rand_place(image)
+            image = imageio.imread('./Dataset/'+self.expression_test[idx])
+            image = common.normalize_img(image)
+            image = common.exp_rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
-            label = torch.from_numpy(self.label_test[idx])
-            filename = self.symbol_test[idx]
+            label = self.expression_test[idx]
+            filename = self.expression_test[idx]
             return filename, image, label
 
         else:
-            idx = idx % len(self.symbol_train)
-            image = imageio.imread(self.symbol_train[idx])
-            image = common.preprocess(image)
-            image = common.rand_place(image)
+            idx = idx % len(self.expression_train)
+            image = imageio.imread('./Dataset/'+ self.expression_train[idx])
+            image = common.normalize_img(image)
+            image = common.exp_rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
             label = self.label_train[idx]
             return image, label
 
     def __len__(self):
         if not self.train:
-            return len(self.symbol_test)
+            return len(self.expression_test)
         else:
-            return self.args.batch_size * self.args.num_batches
+            return len(self.expression_train)
+

@@ -23,3 +23,11 @@ class data:
             loader_test = DataLoader(testset, batch_size=1, shuffle=False, **self.kwargs)
 
             return loader_train, loader_test
+        
+        if self.args.work_type == 'Expression':
+            trainset = getattr(module, self.args.work_type)(self.args)
+            loader_train = DataLoader(trainset, batch_size=self.args.batch_size, shuffle=True, **self.kwargs)
+            testset = getattr(module, self.args.work_type)(self.args, train=False)
+            loader_test = DataLoader(testset, batch_size=1, shuffle=False, **self.kwargs)
+
+            return loader_train, loader_test

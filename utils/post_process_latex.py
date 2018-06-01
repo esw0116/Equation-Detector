@@ -1,14 +1,19 @@
 import numpy as np
 import pandas as pd
-
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from option import args
+from utils.check_encoding import check_encoding
 
 def post_process(args):
     characters = args.dictionary
     print(characters)
 
-    data_csv = pd.read_csv('Dataset/dataset_inkml.csv')
+    data_csv = pd.read_csv('../Dataset/dataset_inkml.csv')
     latex_labels = data_csv['latex_labels']
     latex_labels_np = latex_labels.values
+    image_paths = data_csv['image_paths']
 
     removed = []
     encoded = []
@@ -50,7 +55,11 @@ def post_process(args):
         encoded_values = indices_np[:, 1]
         encoded.append(encoded_values)
 
-    dataframe = pd.DataFrame({'removed': removed, 'encoded': encoded, 'original': original})
-    dataframe.to_csv('Dataset/encoded_dataset.csv')
+    dataframe = pd.DataFrame({'encoded': encoded, 'original': original, 'image_paths': image_paths})
+    dataframe.to_csv('../Dataset/encoded_dataset.csv')
 
     #TODO: REMOVE REDUNDANCIES!
+
+if __name__ == "__main__":
+    #post_process(args)
+    check_encoding(args)

@@ -37,6 +37,7 @@ class Character(data.Dataset):
         if not self.train:
             image = imageio.imread(self.symbol_test[idx])
             image = common.preprocess(image)
+            image = common.normalize_img(image)
             image = common.rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
             label = self.label_test[idx]

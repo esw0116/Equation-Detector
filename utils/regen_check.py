@@ -1,9 +1,13 @@
 import numpy as np
 import pandas as pd
 
+'''
+CODE TO CHECK WHETHER ENCODING WAS DONE CORRECTLY OR NOT
+'''
+
 
 def check_parse():
-    data_csv = pd.read_csv('regenerated_dataset.csv')
+    data_csv = pd.read_csv('../Dataset/regenerated_dataset.csv')
     regenerated = data_csv['regenerated']
     # regenerated = regenerated.values
     original = data_csv['original']
@@ -32,4 +36,5 @@ def check_parse():
     print("False: ", false_count)
 
 
-
+if __name__ == "__main__":
+    check_parse()
