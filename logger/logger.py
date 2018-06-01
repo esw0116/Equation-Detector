@@ -39,7 +39,7 @@ class logger:
             if os.path.exists(os.path.join(self.log_dir, 'model')):
                 print('Load Directory : {}'.format(self.log_dir))
                 self.loss.load(self.log_dir)
-                print('Current Epoch : {}'.format(len(self.loss.log)))
+                print('Current Epoch : {}'.format(len(self.loss.result)-1))
 
             else:
                 args.load_path = '.'
