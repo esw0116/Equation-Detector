@@ -117,7 +117,7 @@ class logger:
             self.lr_ch.append(epoch)
 
         def plot_loss(self, apath, epoch):
-            axis = np.linspace(1, epoch, epoch)
+            axis = np.linspace(1, epoch, epoch*10)
             label = 'Loss_Graph'
             fig = plt.figure()
             plt.title(label)
