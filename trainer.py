@@ -65,6 +65,10 @@ class Trainer_CNN:
     def test(self):
         epoch = self.lr_scheduler.last_epoch + 1
         self.my_model.eval()
+        for p in self.my_model.parameters():
+            print(p)
+            input()
+
         num_correct = 0
         fname_list = []
         table = np.zeros((3, len(self.loader_test)))
@@ -86,7 +90,7 @@ class Trainer_CNN:
         if not self.args.test_only:
             cur_best = torch.max(self.ckp.loss.result).item()
             self.ckp.loss.register_result(num_correct/len(self.loader_test))
-            self.ckp.save(self, epoch, is_best=num_correct/len(self.loader_test) > cur_best)
+            self.ckp.save(self, self.my_model, epoch, is_best=num_correct/len(self.loader_test) > cur_best)
 
     def termination(self):
         if self.args.test_only:

@@ -53,9 +53,11 @@ class model:
             print('Load model from : {}'.format(pre_train))
             self.get_model().load_state_dict(torch.load(pre_train, **kwargs), strict=False)
         else:
-            if not self.args.test_only:
+            if self.args.test_only:
+                print('Load model from : {}'.format(os.path.join(apath, 'model', 'model_latest.pt')))
                 self.get_model().load_state_dict(torch.load(os.path.join(apath, 'model', 'model_latest.pt'), **kwargs),
                                                  strict=False)
             else:
+                print('Load model from : {}'.format(os.path.join(apath, 'model', 'model_best.pt')))
                 self.get_model().load_state_dict(torch.load(os.path.join(apath, 'model', 'model_best.pt'), **kwargs),
                                                  strict=False)

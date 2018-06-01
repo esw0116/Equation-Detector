@@ -54,11 +54,17 @@ class logger:
                     f.write('{}: {}\n'.format(arg, getattr(args, arg)))
                 f.write('\n')
 
-    def save(self, trainer, epoch, is_best=False):
-        trainer.model.save(apath=self.log_dir, is_best=is_best)
+    def save(self, trainer, model, epoch, is_best=False):
+        # trainer.model.save(apath=self.log_dir, model, is_best=is_best)
         self.loss.save(self.log_dir)
         self.loss.plot_loss(self.log_dir, epoch)
+        self.loss.plot_acc(self.log_dir, epoch)
         torch.save(trainer.optimizer.state_dict(), os.path.join(self.log_dir, 'optimizer.pt'))
+        if not os.path.exists(os.path.join(self.log_dir, 'model')):
+            os.makedirs(os.path.join(self.log_dir, 'model'))
+        torch.save(model.state_dict(), os.path.join(self.log_dir, 'model', 'model_latest.pt'))
+        if is_best:
+            torch.save(model.state_dict(), os.path.join(self.log_dir, 'model', 'model_best.pt'))
 
     def save_results(self, fname, array):
         column = ['Testdata', 'Prediction', 'Ground Truth', 'Correct?']
@@ -123,4 +129,18 @@ class logger:
             plt.ylabel('Loss')
             plt.grid(True)
             plt.savefig('{}/loss.pdf'.format(apath))
+            plt.close(fig)
+
+        def plot_acc(self, apath, epoch):
+            axis = np.linspace(1, epoch, epoch)
+            label = 'Accuracy_Graph'
+            fig = plt.figure()
+            plt.title(label)
+            data = self.result.numpy()
+            plt.plot(axis, data[1:], label=label)
+            plt.legend()
+            plt.xlabel('Epochs')
+            plt.ylabel('Accuracy')
+            plt.grid(True)
+            plt.savefig('{}/result.pdf'.format(apath))
             plt.close(fig)
