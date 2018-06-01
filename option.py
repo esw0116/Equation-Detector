@@ -25,7 +25,7 @@ parser.add_argument('--log_dir', type=str, default='./experiment', help='path of
 parser.add_argument('--batch_size', type=int, default=256, help='input batch size for training')
 parser.add_argument('--num_epochs', type=int, default=5, help='Number of batches to run')
 
-parser.add_argument('--learning_rate', type=float, default=0.002, help='Base learning rate for Adam')
+parser.add_argument('--learning_rate', type=float, default=0.01, help='Base learning rate for Adam')
 parser.add_argument('--decay_step', type=int, default=2000, help='Lr decay Step')
 parser.add_argument('--gamma', type=float, default=0.5, help='Lr decay gamma')
 

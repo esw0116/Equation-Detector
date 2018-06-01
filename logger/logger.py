@@ -92,12 +92,12 @@ class logger:
             self.result = torch.zeros(1).to(torch.float)
 
         def load(self, apath):
-            self.log = torch.load('{}.loss_log.pt'.format(apath))
-            self.result = torch.load('{}.result.pt'.format(apath))
+            self.log = torch.load('{}/loss_log.pt'.format(apath))
+            self.result = torch.load('{}/result.pt'.format(apath))
 
         def save(self, apath):
-            torch.save(self.log, '{}.loss_log.pt'.format(apath))
-            torch.save(self.log, '{}.result.pt'.format(apath))
+            torch.save(self.log, '{}/loss_log.pt'.format(apath))
+            torch.save(self.log, '{}/result.pt'.format(apath))
 
         def register_loss(self, value):
             self.log = torch.cat((self.log, torch.zeros(1)))

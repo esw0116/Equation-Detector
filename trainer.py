@@ -2,6 +2,7 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
+from torch import optim
 import tqdm
 
 from optimizer import set_optimizer, set_scheduler
@@ -13,10 +14,12 @@ class Trainer_CNN:
         self.ckp = ckp
         self.model = model
         self.my_model = self.model.get_model()
+        self.my_model.reset()
         self.loader_train, self.loader_test = loader
         self.device = torch.device('cpu' if args.cpu_only else 'cuda')
 
-        self.optimizer = set_optimizer(args, self.my_model)
+        self.optimizer = optim.Adam(self.my_model.parameters(), args.learning_rate)
+        # set_optimizer(args, self.my_model)
         self.lr_scheduler = set_scheduler(args, self.optimizer)
         if args.load_path != '.':
             self.optimizer.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'optimizer.pt')))
@@ -42,8 +45,11 @@ class Trainer_CNN:
             self.optimizer.zero_grad()
 
             images = img.to(torch.float).to(self.device)
-            labels = label.to(torch.long).to(self.device)
+            labels = label.to(self.device)
             output = self.my_model(images)
+
+            # print(labels[0])
+            # print(output[0])
 
             error = self.loss(output, labels)
             error.backward()
@@ -66,7 +72,7 @@ class Trainer_CNN:
         tqdm_loader = tqdm.tqdm(self.loader_test)
         for idx, (fname, image, label) in enumerate(tqdm_loader):
             images = image.to(torch.float).to(self.device)
-            labels = label.to(torch.long).to(self.device)
+            labels = label.to(self.device)
             with torch.autograd.no_grad():
                 output = self.my_model(images)
             fname_list.append(fname)

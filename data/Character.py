@@ -30,8 +30,8 @@ class Character(data.Dataset):
         self.labels_list = _get_class_index(self.symbols_list, self.args.dictionary)
         self.symbol_train, self.symbol_test, self.label_train, self.label_test = \
             train_test_split(self.symbols_list, self.labels_list, test_size=0.1, random_state=self.args.seed)
-        self.label_train = torch.from_numpy(np.asarray(self.label_train, dtype='uint8'))
-        self.label_test = torch.from_numpy(np.asarray(self.label_test, dtype='uint8'))
+        # self.label_train = torch.from_numpy(np.asarray(self.label_train, dtype='uint8'))
+        # self.label_test = torch.from_numpy(np.asarray(self.label_test, dtype='uint8'))
 
     def __getitem__(self, idx):
         if not self.train:
