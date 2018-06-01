@@ -22,6 +22,25 @@ class Trainer_CNN:
         # set_optimizer(args, self.my_model)
         self.lr_scheduler = set_scheduler(args, self.optimizer)
         if args.load_path != '.':
+            if args.cpu_only:
+                kwargs = {'map_location': lambda storage, loc: storage}
+            else:
+                kwargs = {}
+
+            if args.pre_train != '.':
+                print('Load model from : {}'.format(args.pre_train))
+                self.my_model.load_state_dict(torch.load(args.pre_train, **kwargs), strict=False)
+            else:
+                if self.args.test_only:
+                    print('Load model from : {}'.format(os.path.join(ckp.log_dir, 'model', 'model_latest.pt')))
+                    self.my_model.load_state_dict(
+                        torch.load(os.path.join(ckp.log_dir, 'model', 'model_latest.pt'), **kwargs),
+                        strict=False)
+                else:
+                    print('Load model from : {}'.format(os.path.join(ckp.log_dir, 'model', 'model_best.pt')))
+                    self.my_model.load_state_dict(
+                        torch.load(os.path.join(ckp.log_dir, 'model', 'model_best.pt'), **kwargs),
+                        strict=False)
             self.optimizer.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'optimizer.pt')))
             for _ in range(len(self.ckp.loss.log)):
                 self.lr_scheduler.step()
@@ -65,9 +84,6 @@ class Trainer_CNN:
     def test(self):
         epoch = self.lr_scheduler.last_epoch + 1
         self.my_model.eval()
-        for p in self.my_model.parameters():
-            print(p)
-            input()
 
         num_correct = 0
         fname_list = []
