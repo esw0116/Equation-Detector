@@ -82,6 +82,7 @@ class Trainer_CNN:
                 table[2, idx] = 1
 
         print('In Epoch {}, Acc is {}'.format(epoch, num_correct/len(self.loader_test)))
+        self.ckp.save_results(fname_list, table)
         if not self.args.test_only:
             cur_best = torch.max(self.ckp.loss.result).item()
             self.ckp.loss.register_result(num_correct/len(self.loader_test))
