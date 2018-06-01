@@ -11,4 +11,10 @@ def set_template(args):
 
     elif args.template.find('DW') >= 0:
         args.work_type = 'Character'
-        # Add your own argparse
+        args.model = 'inception_model'
+        args.batch_size = 64
+        args.epochs = 5
+        args.learning_rate = 2e-3
+        args.decay_step = 1
+        args.gamma = 0.5
+ 

@@ -31,7 +31,7 @@ class Trainer_CNN:
                 print('Load model from : {}'.format(args.pre_train))
                 self.my_model.load_state_dict(torch.load(args.pre_train, **kwargs), strict=False)
             else:
-                if self.args.test_only:
+                if not self.args.test_only:
                     print('Load model from : {}'.format(os.path.join(ckp.log_dir, 'model', 'model_latest.pt')))
                     self.my_model.load_state_dict(
                         torch.load(os.path.join(ckp.log_dir, 'model', 'model_latest.pt'), **kwargs),
@@ -42,7 +42,7 @@ class Trainer_CNN:
                         torch.load(os.path.join(ckp.log_dir, 'model', 'model_best.pt'), **kwargs),
                         strict=False)
             self.optimizer.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'optimizer.pt')))
-            for _ in range(len(self.ckp.loss.log)):
+            for _ in range(1, len(ckp.loss.result)):
                 self.lr_scheduler.step()
 
         self.loss = nn.CrossEntropyLoss()
@@ -58,10 +58,12 @@ class Trainer_CNN:
             self.ckp.loss.detect_lr_change(epoch)
 
         sum_loss = 0
+        cnt = 0
+        record_iter = len(self.loader_train) // 10
         tqdm_loader = tqdm.tqdm(self.loader_train)
 
         for idx, (img, label) in enumerate(tqdm_loader):
-            self.optimizer.zero_grad()
+            self.optimizer.zero_grad() 
 
             images = img.to(torch.float).to(self.device)
             labels = label.to(self.device)
@@ -77,9 +79,12 @@ class Trainer_CNN:
             error = error.data.item()
             sum_loss += error
 
+            if (idx + 1) % record_iter == 0:
+                self.ckp.loss.register_loss(sum_loss/record_iter)
+                sum_loss = 0 
+
             tqdm_loader.set_description("CLoss: {:.4f}, LR: {:10.1e}".format(error, lr_after))
 
-        self.ckp.loss.register_loss(sum_loss/len(self.loader_train))
 
     def test(self):
         epoch = self.lr_scheduler.last_epoch + 1

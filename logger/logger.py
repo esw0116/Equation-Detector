@@ -103,7 +103,7 @@ class logger:
 
         def save(self, apath):
             torch.save(self.log, '{}/loss_log.pt'.format(apath))
-            torch.save(self.log, '{}/result.pt'.format(apath))
+            torch.save(self.result, '{}/result.pt'.format(apath))
 
         def register_loss(self, value):
             self.log = torch.cat((self.log, torch.zeros(1)))
