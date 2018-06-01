@@ -8,7 +8,7 @@ import tqdm
 from optimizer import set_optimizer, set_scheduler
 
 
-class Trainer_CNN:
+class Trainer_RNN:
     def __init__(self, args, loader, model, ckp):
         self.args = args
         self.ckp = ckp
@@ -19,14 +19,12 @@ class Trainer_CNN:
         self.device = torch.device('cpu' if args.cpu_only else 'cuda')
 
         self.optimizer = optim.Adam(self.my_model.parameters(), args.learning_rate)
-        # set_optimizer(args, self.my_model)
         self.lr_scheduler = set_scheduler(args, self.optimizer)
+        if args.cpu_only:
+            kwargs = {'map_location': lambda storage, loc: storage}
+        else:
+            kwargs = {}
         if args.load_path != '.':
-            if args.cpu_only:
-                kwargs = {'map_location': lambda storage, loc: storage}
-            else:
-                kwargs = {}
-
             if args.pre_train != '.':
                 print('Load model from : {}'.format(args.pre_train))
                 self.my_model.load_state_dict(torch.load(args.pre_train, **kwargs), strict=False)
@@ -45,6 +43,10 @@ class Trainer_CNN:
             for _ in range(1, len(ckp.loss.result)):
                 self.lr_scheduler.step()
 
+        if args.CNN_pre != '.':
+            print('Load CNN params...')
+            self.my_model.cnn.load_state_dict(torch.load(args.pre_train, **kwargs), strict=False)
+
         self.loss = nn.CrossEntropyLoss()
 
     def train(self):
@@ -62,7 +64,7 @@ class Trainer_CNN:
         tqdm_loader = tqdm.tqdm(self.loader_train)
 
         for idx, (img, label) in enumerate(tqdm_loader):
-            self.optimizer.zero_grad() 
+            self.optimizer.zero_grad()
 
             images = img.to(torch.float).to(self.device)
             labels = label.to(self.device)
@@ -80,7 +82,7 @@ class Trainer_CNN:
 
             if (idx + 1) % record_iter == 0:
                 self.ckp.loss.register_loss(sum_loss/record_iter)
-                sum_loss = 0 
+                sum_loss = 0
 
             tqdm_loader.set_description("CLoss: {:.4f}, LR: {:10.1e}".format(error, lr_after))
 

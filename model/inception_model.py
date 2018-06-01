@@ -151,6 +151,10 @@ class BasicConv(nn.Module):
         self.conv = nn.Conv2d(in_channels, out_channels, **kwargs)
         self.bn = nn.BatchNorm2d(out_channels)
         self.leaky = nn.LeakyReLU(0.1)
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
     
     def forward(self, x):
         x = self.conv(x)
@@ -158,7 +162,3 @@ class BasicConv(nn.Module):
         x = self.leaky(x)
         return x
     
-    def reset(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight.data)

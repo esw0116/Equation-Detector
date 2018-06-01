@@ -13,7 +13,7 @@ class model:
         self.args = args
         self.ckp = ckp
         self.device = torch.device('cpu' if args.cpu_only else 'cuda')
-        self.module = import_module('model.'+args.model.lower())
+        self.module = import_module('model.'+args.model)
         self.model = self.module.make_model(args).to(self.device)
 
         if not args.cpu_only and self.args.n_GPUs > 1:

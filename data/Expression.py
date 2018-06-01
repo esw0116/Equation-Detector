@@ -11,12 +11,12 @@ import pandas as pd
 
 from data import common
 
-# csv_file = '../Dataset/
+# csv_file = './Dataset/
 
 
 class Expression(data.Dataset):
-    def __init__(self, args, train=True, csv_file):
-        csv_data = pd.read_csv(csv_file)
+    def __init__(self, args, train=True):
+        csv_data = pd.read_csv('./Dataset/encoded_dataset.csv')
         encoded = csv_data['encoded']
         encoded = encoded.values
         self.encoded_list = []

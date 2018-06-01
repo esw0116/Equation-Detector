@@ -3,6 +3,11 @@ import torch.nn as nn
 from model import baseline
 from model import common
 
+
+def make_model(args):
+    CRNN(args)
+
+
 class BidirectionalLSTM(nn.Module):
 
     def __init__(self, nIn, nHidden, nOut):
@@ -28,7 +33,7 @@ class CRNN(baseline.baseline, BidirectionalLSTM):
     def __init__(self, args, conv=common.default_conv):
         super(CRNN, self).__init__(args, conv)
         self.cnn = nn.Sequential(*list(baseline.baseline.features.children())[0:-2])
-        self.lstm = nn.Sequential(*list(BidirectionalLSTM.features.children()))
+        self.lstm = BidirectionalLSTM.features.children()
 
     def forward(self, x):
         cnn = self.cnn(x)
