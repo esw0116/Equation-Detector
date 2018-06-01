@@ -34,6 +34,6 @@ Test Set for Equation : Testdata in 2014 CHORME(988 items)
 - [x] (Not Tested Yet)Save optimizer parameters
 - [x] (Not Tested Yet)Add resume functions
 - [ ] Distinguish CAPITAL letters from small letters in symbol directory
-- [ ] Create Dataloader for RNN input/output
+- [x] Create Dataloader for RNN input/output
 - [ ] (OPTIONAL) Hierarchical softmax
 - [ ] (OPTIONAL) More data for symbol classification
