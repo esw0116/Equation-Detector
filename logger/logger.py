@@ -111,13 +111,13 @@ class logger:
 
         def register_result(self, value):
             self.result = torch.cat((self.result, torch.zeros(1)))
-            self.log[-1] = value
+            self.result[-1] = value
 
         def detect_lr_change(self, epoch):
             self.lr_ch.append(epoch)
 
         def plot_loss(self, apath, epoch):
-            axis = np.linspace(1, epoch, epoch*10)
+            axis = np.linspace(0.1, epoch, epoch*10)
             label = 'Loss_Graph'
             fig = plt.figure()
             plt.title(label)

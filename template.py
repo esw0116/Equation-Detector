@@ -17,4 +17,12 @@ def set_template(args):
         args.learning_rate = 2e-3
         args.decay_step = 1
         args.gamma = 0.5
- 
+
+    elif args.template.find('res') >=0:
+	    args.work_type='Character'
+	    args.model = 'resnet'
+	    args.batch_size = 128
+	    args.epochs = 10
+	    args.learning_rate = 2e-3
+	    args.decay_step = 1
+	    args.gamma = 0.5 
