@@ -37,3 +37,5 @@ Test Set for Equation : Testdata in 2014 CHORME(988 items)
 - [x] Create Dataloader for RNN input/output
 - [ ] (OPTIONAL) Hierarchical softmax
 - [ ] (OPTIONAL) More data for symbol classification
+- [ ] 0 is saved to result.pt
+- [ ] loss_log is bouncing

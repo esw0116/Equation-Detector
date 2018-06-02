@@ -11,7 +11,6 @@ def make_model(args):
 class baseline(nn.Module):
     def __init__(self, args, conv = common.default_conv):
         super(baseline, self).__init__()
-        # TODO : Change Depth
 
         conv_list = []
         conv_list.extend([conv(1, 16, 3), nn.ReLU(True)])

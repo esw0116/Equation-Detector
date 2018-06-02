@@ -18,6 +18,7 @@ class model:
 
         if not args.cpu_only and self.args.n_GPUs > 1:
             self.model = nn.DataParallel(self.model, range(args.n_GPUs))
+
         # if args.load_path != '.':
         #    self.load(ckp.log_dir, args.pre_train, args.cpu_only)
 

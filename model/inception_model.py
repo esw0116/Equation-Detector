@@ -27,7 +27,7 @@ Conv2d 1x1: 3*15*128        Just to match 3*15*128 Output
 
 -------------------------
 FC 1: 5760 --> 400
-FC 2: 400 --> 82
+FC 2: 400 --> 118
 '''
 
 class Inceptionv3(nn.Module):
@@ -73,8 +73,14 @@ class Inceptionv3(nn.Module):
         return out
 
     def reset(self):
-        for m in self.modules():
+        for m in self.children():
+            print(m)
+            input()
+            if isinstance(m, BasicConv) or isinstance(m, InceptionA) or isinstance(m, InceptionB):
+                m.reset()
+
             if isinstance(m, nn.Conv2d):
+                print('!')
                 nn.init.kaiming_normal_(m.weight.data)
 
 '''
@@ -117,6 +123,15 @@ class InceptionA(nn.Module):
 
         return torch.cat(outputs, 1)
 
+    def reset(self):
+        print('A')
+        for m in self.children():
+            if isinstance(m, BasicConv):
+                m.reset()
+
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight.data)
+
 class InceptionB(nn.Module):
 
     def __init__(self, in_channels):
@@ -143,6 +158,15 @@ class InceptionB(nn.Module):
         outputs = [branch3x3, branch1x1_3x3, branch_pool]
         return torch.cat(outputs, 1)
 
+    def reset(self):
+        print('B')
+        for m in self.children():
+            if isinstance(m, BasicConv):
+                m.reset()
+
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight.data)
+
 
 class BasicConv(nn.Module):
 
@@ -151,14 +175,16 @@ class BasicConv(nn.Module):
         self.conv = nn.Conv2d(in_channels, out_channels, **kwargs)
         self.bn = nn.BatchNorm2d(out_channels)
         self.leaky = nn.LeakyReLU(0.1)
-
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
     
     def forward(self, x):
         x = self.conv(x)
         x = self.bn(x)
         x = self.leaky(x)
         return x
-    
+
+    def reset(self):
+        print('C')
+        for m in self.children():
+            if isinstance(m, nn.Conv2d):
+                print('!')
+                nn.init.kaiming_normal_(m.weight.data)
