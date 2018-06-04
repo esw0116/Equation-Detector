@@ -51,6 +51,5 @@ letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
-tokens = ['start', 'end']
-
-args.dictionary = list(sorted(specials+greeks+numbers+letters, key=len, reverse=True)+tokens)
+tokens = ['<pad>', '<start>', '<end>', '<unk>']
+args.dictionary = list(tokens + sorted(specials+greeks+numbers+letters, key=len, reverse=True))
