@@ -33,6 +33,7 @@ def rand_place(img, h=96, w=480):
 
     return palette
 
+
 def exp_rand_place(img, h=96, w=480):
     y, x = img.shape
     randx = np.random.randint(0, w - x)
@@ -42,4 +43,3 @@ def exp_rand_place(img, h=96, w=480):
     palette[randy:randy+y, randx:randx+x] = img
     
     return palette
-    
