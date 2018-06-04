@@ -21,10 +21,11 @@ class Expression(data.Dataset):
         encoded = encoded.values
         self.encoded_list = []
         for encoding in encoded:
-            encoding.replace("[", "")
-            encoding.replace("]", "")
-            encoding.replace("\n", "")
-            encoding.split(" ")
+            encoding = encoding.replace("[", "")
+            encoding = encoding.replace("]", "")
+            encoding = encoding.replace("\n", "")
+            encoding = encoding.split()
+            #print(encoding)
             encoding = np.array(encoding).astype(int)
             # Add start and end token
             encoding = np.append(1, encoding)
@@ -36,15 +37,15 @@ class Expression(data.Dataset):
         self.args = args
         self.train = train
         self.expression_train, self.expression_test, self.label_train, self.label_test = \
-            train_test_split(self.encoded_list, self.image_paths, test_size=0.1, random_state=args.seed)
+            train_test_split(self.image_paths, self.encoded_list, test_size=0.1, random_state=args.seed)
 
     def __getitem__(self, idx):
         if not self.train:
-            image = imageio.imread('./Dataset/'+self.expression_test[idx])
+            image = imageio.imread(os.path.join('./Dataset/', self.expression_test[idx]))
             image = common.normalize_img(image)
             image = common.exp_rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
-            label = self.expression_test[idx]
+            label = torch.Tensor(self.expression_test[idx])
             filename = self.expression_test[idx]
             return filename, image, label
 
@@ -54,7 +55,7 @@ class Expression(data.Dataset):
             image = common.normalize_img(image)
             image = common.exp_rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
-            label = self.label_train[idx]
+            label = torch.Tensor(self.label_train[idx])
             return image, label
 
     def __len__(self):

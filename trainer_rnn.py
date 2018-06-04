@@ -46,7 +46,7 @@ class Trainer_RNN:
 
         if args.CNN_pre != '.':
             print('Load CNN params...')
-            self.my_model.cnn.load_state_dict(torch.load(args.pre_train, **kwargs), strict=False)
+            self.my_model.cnn.load_state_dict(torch.load(args.CNN_pre, **kwargs), strict=False)
 
         self.loss = nn.CrossEntropyLoss()
 
@@ -70,7 +70,7 @@ class Trainer_RNN:
             images = img.to(torch.float).to(self.device)
             captions = capt.to(self.device)
             targets = pack_padded_sequence(captions, length, batch_first=True)[0]
-            output = self.my_model(images)
+            output = self.my_model(images, captions, length)
 
             error = self.loss(output, targets)
             error.backward()

@@ -94,8 +94,6 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
-
-
         out = self.conv2(out)
         out = out.view(out.size(0), -1)
         out = self.fc1(out)
@@ -106,10 +104,14 @@ class ResNet(nn.Module):
         return
 
 
-def resnet34(args):
-    model = ResNet(BasicBlock, [3, 4, 6, 3])
+class resnet34(nn.Module):
+    def __init__(self, args):
+        super(resnet34, self).__init__()
+        self.model = ResNet(BasicBlock, [3, 4, 6, 3])
 
-    return model
+    def forward(self, x):
+        x = self.model(x)
+        return x
 
-
-        
+    def reset(self):
+        return

@@ -1,10 +1,14 @@
+import torch
 import torch.nn as nn
+from torch.nn.utils.rnn import pack_padded_sequence
 
-from model import model
+from model import resnet
+from model import baseline
 
 
 def make_model(args):
-    CRNN(args)
+    return CRNN(args, 15*3*128, 128, 122, 1)
+
 
 # input model name for model
 class EncoderCNN(nn.Module):
@@ -18,7 +22,7 @@ class EncoderCNN(nn.Module):
                 'model_best.pt'), **kwargs), strict=False)
         
         # delete Fully Connected layer
-        modules = list(my_model.childre())[:-1]
+        modules = list(my_model.children())[:-1]
         self.my_model = nn.Sequential(*modules)
     
     def forward(self, x):
@@ -28,17 +32,22 @@ class EncoderCNN(nn.Module):
         features = features.reshape(features.size(0), -1)
         return features
 
-class BidirectionalLSTM(nn.Module):
+
+class CRNN(nn.Module):
 
     def __init__(self, args, embed_size, hidden_size, lexicon_size, num_layers, max_seq_length=96):
         super(CRNN, self).__init__()
+        CNN = resnet.resnet34(args)
+        self.cnn = nn.Sequential(*list(CNN.children())[:-1])
         self.embed = nn.Embedding(lexicon_size, embed_size)
         # num layers can be 1 or 2
         self.bilstm = nn.LSTM(embed_size, hidden_size, num_layers, bidirectional=True, batch_first = True)
         self.linear = nn.Linear(hidden_size, lexicon_size)
         self.max_seq_length = max_seq_length
 
-    def forward(self, features, labels, lengths):
+    def forward(self, images, labels, lengths):
+        features = self.cnn(images)
+        features = features.reshape(features.size(0), -1)
         embeddings = self.embed(labels)
         # batch at dimension 0
         embeddings = torch.cat((features.unsqueeze(1), embeddings),1)
@@ -47,7 +56,9 @@ class BidirectionalLSTM(nn.Module):
         outputs = self.linear(hiddens[0])
         return outputs
 
-    def sample(self, features, states = None):
+    def sample(self, images, states=None):
+        features = self.cnn(images)
+        features = features.reshape(features.size(0), -1)
         sampled_idx = []
         inputs = features.unsqueeze(1)
         for i in range(self.max_seq_length):
@@ -59,6 +70,9 @@ class BidirectionalLSTM(nn.Module):
             inputs = inputs.unsqueeze(1)
         sampled_idx = torch.stack(sampled_idx, 1)
         return sampled_idx
+
+    def reset(self):
+        return
 
 '''
 class BidirectionalLSTM(nn.Module):
