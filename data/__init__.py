@@ -16,15 +16,15 @@ class data:
             self.kwargs['pin_memory'] = True
 
     def collate_fn(self, data):
-        data.sort(key=lambda x: len(x[1]), reverse=True)
-        images, captions = zip(*data)
+        data.sort(key=lambda x: len(x[2]), reverse=True)
+        filenames, images, captions = zip(*data)
         images = torch.stack(images, 0)
         lengths = [len(cap) for cap in captions]
         targets = torch.zeros(len(captions), max(lengths)).long()
         for i, cap in enumerate(captions):
             end = lengths[i]
             targets[i, :end] = cap[:end]
-        return images, targets, lengths
+        return filenames, images, targets, lengths
 
     def get_loader(self):
         module = import_module('data.' + self.args.work_type)

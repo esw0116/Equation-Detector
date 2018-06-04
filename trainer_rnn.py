@@ -64,7 +64,7 @@ class Trainer_RNN:
         record_iter = len(self.loader_train) // 10
         tqdm_loader = tqdm.tqdm(self.loader_train)
 
-        for idx, (img, capt, length) in enumerate(tqdm_loader):
+        for idx, (_, img, capt, length) in enumerate(tqdm_loader):
             self.optimizer.zero_grad()
 
             images = img.to(torch.float).to(self.device)
@@ -98,7 +98,7 @@ class Trainer_RNN:
             images = image.to(torch.float).to(self.device)
             captions = capt.to(self.device)
             with torch.autograd.no_grad():
-                output = self.my_model(images)
+                output = self.my_model.sample(images)
             fname_list.append(fname)
             table[0:2, idx] = [output.argmax(), labels]
             if labels == output.argmax():

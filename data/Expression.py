@@ -45,7 +45,7 @@ class Expression(data.Dataset):
             image = common.normalize_img(image)
             image = common.exp_rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
-            label = torch.Tensor(self.expression_test[idx])
+            label = torch.Tensor(self.label_test[idx])
             filename = self.expression_test[idx]
             return filename, image, label
 
@@ -56,7 +56,9 @@ class Expression(data.Dataset):
             image = common.exp_rand_place(image)
             image = transforms.ToTensor()(image[:, :, np.newaxis])
             label = torch.Tensor(self.label_train[idx])
-            return image, label
+            filename = self.expression_train[idx]
+
+            return filename, image, label
 
     def __len__(self):
         if not self.train:

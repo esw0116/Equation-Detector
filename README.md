@@ -33,7 +33,8 @@ Test Set for Equation : Testdata in 2014 CHORME(988 items)
 - [x] Implement loading model from pt file
 - [x] Save optimizer parameters
 - [x] Add resume functions
-- [ ] Distinguish CAPITAL letters from small letters in symbol directory
 - [x] Create Dataloader for RNN input/output
 - [ ] (OPTIONAL) Hierarchical softmax
 - [ ] (OPTIONAL) More data for symbol classification
+- [ ] Post Processing in LSTM
+- [ ] Load various cnn models in CRNN

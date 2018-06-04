@@ -42,7 +42,7 @@ class CRNN(nn.Module):
         self.embed = nn.Embedding(lexicon_size, embed_size)
         # num layers can be 1 or 2
         self.bilstm = nn.LSTM(embed_size, hidden_size, num_layers, bidirectional=True, batch_first = True)
-        self.linear = nn.Linear(hidden_size, lexicon_size)
+        self.linear = nn.Linear(2*hidden_size, lexicon_size)
         self.max_seq_length = max_seq_length
 
     def forward(self, images, labels, lengths):
@@ -54,7 +54,6 @@ class CRNN(nn.Module):
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
         packed = pack_padded_sequence(embeddings, lengths, batch_first = True)
         hiddens, _ = self.bilstm(packed)
-        print(hiddens.size())
         outputs = self.linear(hiddens[0])
         return outputs
 
@@ -64,7 +63,7 @@ class CRNN(nn.Module):
         sampled_idx = []
         inputs = features.unsqueeze(1)
         for i in range(self.max_seq_length):
-            hiddens, states = self.lstm(inputs, states)
+            hiddens, states = self.bilstm(inputs, states)
             outputs = self.linear(hiddens.squeeze(1))
             _, predicted = outputs.max(1)
             sampled_idx.append(predicted)
