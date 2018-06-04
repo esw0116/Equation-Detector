@@ -37,7 +37,7 @@ class CRNN(nn.Module):
 
     def __init__(self, args, embed_size, hidden_size, lexicon_size, num_layers, max_seq_length=96):
         super(CRNN, self).__init__()
-        CNN = resnet.resnet34(args)
+        CNN = resnet.resnet34(args).model
         self.cnn = nn.Sequential(*list(CNN.children())[:-1])
         self.embed = nn.Embedding(lexicon_size, embed_size)
         # num layers can be 1 or 2
@@ -46,13 +46,15 @@ class CRNN(nn.Module):
         self.max_seq_length = max_seq_length
 
     def forward(self, images, labels, lengths):
-        features = self.cnn(images)
+        with torch.no_grad():
+            features = self.cnn(images)
         features = features.reshape(features.size(0), -1)
         embeddings = self.embed(labels)
         # batch at dimension 0
-        embeddings = torch.cat((features.unsqueeze(1), embeddings),1)
+        embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
         packed = pack_padded_sequence(embeddings, lengths, batch_first = True)
-        hiddens, _ = self.lstm(packed)
+        hiddens, _ = self.bilstm(packed)
+        print(hiddens.size())
         outputs = self.linear(hiddens[0])
         return outputs
 
