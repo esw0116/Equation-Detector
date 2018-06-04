@@ -19,7 +19,8 @@ parser.add_argument('--data_path', type=str, default='./Dataset', help='path of 
 parser.add_argument('--save_path', type=str, default='../../Feature_map', help='path of saving image directory')
 
 parser.add_argument('--test_only', action='store_true', help='test only mode')
-parser.add_argument('--load_path', type=str, default='20180525_baseline_002', help='load path')
+parser.add_argument('--load_path', type=str, default='.', help='load path')
+parser.add_argument('--CNN_pre', type=str, default='.', help='load path of CNN model when training RNN')
 parser.add_argument('--log_dir', type=str, default='./experiment', help='path of pre_trained data')
 
 parser.add_argument('--batch_size', type=int, default=256, help='input batch size for training')

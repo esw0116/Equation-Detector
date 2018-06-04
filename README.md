@@ -30,12 +30,10 @@ Test Set for Equation : Testdata in 2014 CHORME(988 items)
 - [x] Encode the latex code according to the dictionary
 - [x] Check the encoding algorithm by making a decoder
 - [x] Keep updating dictionary, check for errors
-- [x] (Not Tested Yet)Implement loading model from pt file
-- [x] (Not Tested Yet)Save optimizer parameters
-- [x] (Not Tested Yet)Add resume functions
+- [x] Implement loading model from pt file
+- [x] Save optimizer parameters
+- [x] Add resume functions
 - [ ] Distinguish CAPITAL letters from small letters in symbol directory
 - [x] Create Dataloader for RNN input/output
 - [ ] (OPTIONAL) Hierarchical softmax
 - [ ] (OPTIONAL) More data for symbol classification
-- [ ] 0 is saved to result.pt
-- [ ] loss_log is bouncing

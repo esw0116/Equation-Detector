@@ -2,6 +2,7 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.nn.utils.rnn import pack_padded_sequence
 from torch import optim
 import tqdm
 
@@ -63,17 +64,15 @@ class Trainer_RNN:
         record_iter = len(self.loader_train) // 10
         tqdm_loader = tqdm.tqdm(self.loader_train)
 
-        for idx, (img, label) in enumerate(tqdm_loader):
+        for idx, (img, capt, length) in enumerate(tqdm_loader):
             self.optimizer.zero_grad()
 
             images = img.to(torch.float).to(self.device)
-            labels = label.to(self.device)
+            captions = capt.to(self.device)
+            targets = pack_padded_sequence(captions, length, batch_first=True)[0]
             output = self.my_model(images)
 
-            # print(labels[0])
-            # print(output[0])
-
-            error = self.loss(output, labels)
+            error = self.loss(output, targets)
             error.backward()
             self.optimizer.step()
 
@@ -86,7 +85,6 @@ class Trainer_RNN:
 
             tqdm_loader.set_description("CLoss: {:.4f}, LR: {:10.1e}".format(error, lr_after))
 
-
     def test(self):
         epoch = self.lr_scheduler.last_epoch + 1
         self.my_model.eval()
@@ -96,9 +94,9 @@ class Trainer_RNN:
         table = np.zeros((3, len(self.loader_test)))
 
         tqdm_loader = tqdm.tqdm(self.loader_test)
-        for idx, (fname, image, label) in enumerate(tqdm_loader):
+        for idx, (fname, image, capt, length) in enumerate(tqdm_loader):
             images = image.to(torch.float).to(self.device)
-            labels = label.to(self.device)
+            captions = capt.to(self.device)
             with torch.autograd.no_grad():
                 output = self.my_model(images)
             fname_list.append(fname)
