@@ -8,7 +8,6 @@ from utils.check_encoding import check_encoding
 
 def post_process(args):
     characters = args.dictionary
-    print(characters)
 
     data_csv = pd.read_csv('../Dataset/dataset_inkml.csv')
     latex_labels = data_csv['latex_labels']
@@ -61,5 +60,5 @@ def post_process(args):
     #TODO: REMOVE REDUNDANCIES!
 
 if __name__ == "__main__":
-    #post_process(args)
+    # post_process(args)
     check_encoding(args)
