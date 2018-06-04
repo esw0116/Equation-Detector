@@ -3,7 +3,7 @@ import glob
 from importlib import import_module
 from torch.utils.data import DataLoader
 
-from data import Character
+from data import Character, Expression
 
 
 class data:

@@ -26,9 +26,9 @@ class Expression(data.Dataset):
             encoding.replace("\n", "")
             encoding.split(" ")
             encoding = np.array(encoding).astype(int)
-            zero_pad = np.zeros(96-len(encoding)).astype(int)
-            zero_pad -= 1
-            encoding = np.append(encoding, zero_pad).astype(int)
+            # Add start and end token
+            encoding = np.append(len(args.dictionary)-2, encoding).astype(int)
+            encoding = np.append(encoding, len(args.dictionary)-1).astype(int)
             self.encoded_list.append(encoding)
 
         self.image_paths = csv_data['image_paths']
