@@ -46,7 +46,18 @@ class Trainer_RNN:
 
         if args.CNN_pre != '.':
             print('Load CNN params...')
-            self.my_model.cnn.load_state_dict(torch.load(args.CNN_pre, **kwargs), strict=False)
+            pre_train = torch.load(args.CNN_pre, **kwargs)
+            '''
+            for k in list(pre_train.keys()):
+                if k.find('fc') != -1:
+                    pre_train.pop(k)
+            '''
+            print(pre_train.keys())
+            print(self.my_model.cnn.state_dict().keys())
+            self.my_model.cnn.load_state_dict(pre_train, strict=False)
+            for p in self.my_model.parameters():
+                print(p.data)
+                input()
 
         self.loss = nn.CrossEntropyLoss()
 
@@ -71,7 +82,12 @@ class Trainer_RNN:
             captions = capt.to(self.device)
             targets = pack_padded_sequence(captions, length, batch_first=True)[0]
             output = self.my_model(images, captions, length)
-
+            '''
+            for p in self.my_model.parameters():
+                if p.requires_grad:
+                    print(p.name, p.data)
+                    input()
+            '''
             error = self.loss(output, targets)
             error.backward()
             self.optimizer.step()

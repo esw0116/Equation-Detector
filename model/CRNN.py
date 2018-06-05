@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence
+import os
 
 from model import resnet
 from model import baseline
@@ -18,8 +19,7 @@ class EncoderCNN(nn.Module):
         my_model.reset()
         self.ckp = ckp
         
-        my_model.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'model', 
-                'model_best.pt'), **kwargs), strict=False)
+        my_model.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'model', 'model_best.pt'), **kwargs), strict=False)
         
         # delete Fully Connected layer
         modules = list(my_model.children())[:-1]
@@ -37,11 +37,14 @@ class CRNN(nn.Module):
 
     def __init__(self, args, embed_size, hidden_size, lexicon_size, num_layers, max_seq_length=96):
         super(CRNN, self).__init__()
-        CNN = resnet.resnet34(args).model
+        # CNN = resnet.resnet34(args).model
+        CNN = baseline.baseline(args)
+        print(list(CNN.children()))
         self.cnn = nn.Sequential(*list(CNN.children())[:-1])
+        print(self.cnn.state_dict().keys())
         self.embed = nn.Embedding(lexicon_size, embed_size)
         # num layers can be 1 or 2
-        self.bilstm = nn.LSTM(embed_size, hidden_size, num_layers, bidirectional=True, batch_first = True)
+        self.bilstm = nn.LSTM(embed_size, hidden_size, num_layers, bidirectional=True, batch_first=True)
         self.linear = nn.Linear(2*hidden_size, lexicon_size)
         self.max_seq_length = max_seq_length
 

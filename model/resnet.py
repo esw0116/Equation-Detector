@@ -5,7 +5,7 @@ import torch.nn.functional as f
 import numpy as np
 
 def make_model(args):
-    return resnet34(args)
+    return ResNet(BasicBlock, [3, 4, 6, 3])
 
 class BasicConv(nn.Module):
 
@@ -84,7 +84,7 @@ class ResNet(nn.Module):
         self.inplanes = planes
         for i in range(1, blocks):
             layers.append(block(self.inplanes, planes))
-        
+
         return nn.Sequential(*layers)
 
     def forward(self, x):
@@ -104,6 +104,8 @@ class ResNet(nn.Module):
         return
 
 
+
+
 class resnet34(nn.Module):
     def __init__(self, args):
         super(resnet34, self).__init__()
@@ -115,3 +117,6 @@ class resnet34(nn.Module):
 
     def reset(self):
         return
+
+    def state_dict(self, **kwargs):
+        return self.model.state_dict(**kwargs)
