@@ -97,6 +97,7 @@ class Trainer_CNN:
         for idx, (fname, image, label) in enumerate(tqdm_loader):
             images = image.to(torch.float).to(self.device)
             labels = label.to(self.device)
+            # print(label)
             with torch.autograd.no_grad():
                 output = self.my_model(images)
             fname_list.append(fname)

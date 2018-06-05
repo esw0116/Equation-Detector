@@ -7,7 +7,9 @@ from torch import optim
 import tqdm
 
 from optimizer import set_optimizer, set_scheduler
+from model import CRNN
 
+DEBUG_MODE = False
 
 class Trainer_RNN:
     def __init__(self, args, loader, model, ckp):
@@ -19,8 +21,19 @@ class Trainer_RNN:
         self.loader_train, self.loader_test = loader
         self.device = torch.device('cpu' if args.cpu_only else 'cuda')
 
-        self.optimizer = optim.Adam(self.my_model.parameters(), args.learning_rate)
+        self.loss = nn.CrossEntropyLoss()
+        self.encoder = CRNN.make_encoder(args).to(self.device)
+        self.decoder = CRNN.make_decoder(args).to(self.device)
+
+        # IF gradient only in RNN + linear layer:
+        # self.params = list(self.decoder.parameters()) + list(self.encoder.linear.parameters()) + list(self.encoder.bn.parameters())
+        # ELSE:
+        self.params = list(self.decoder.parameters()) + list(self.encoder.parameters())
+
+        # only train decoder
+        self.optimizer = optim.Adam(self.params, args.learning_rate)
         self.lr_scheduler = set_scheduler(args, self.optimizer)
+
         if args.cpu_only:
             kwargs = {'map_location': lambda storage, loc: storage}
         else:
@@ -47,8 +60,9 @@ class Trainer_RNN:
         if args.CNN_pre != '.':
             print('Load CNN params...')
             self.my_model.cnn.load_state_dict(torch.load(args.CNN_pre, **kwargs), strict=False)
+            print("Loaded CNN params!")
 
-        self.loss = nn.CrossEntropyLoss()
+        
 
     def train(self):
         lr_before = self.lr_scheduler.get_lr()[0]
@@ -68,13 +82,22 @@ class Trainer_RNN:
             self.optimizer.zero_grad()
 
             images = img.to(torch.float).to(self.device)
-            captions = capt.to(self.device)
+            captions = capt.to(self.device) 
             targets = pack_padded_sequence(captions, length, batch_first=True)[0]
-            output = self.my_model(images, captions, length)
 
-            error = self.loss(output, targets)
+            features = self.encoder(images)
+            outputs = self.decoder(features, captions, length)
+            error = self.loss(outputs, targets)
+            self.decoder.zero_grad()
+            self.encoder.zero_grad()
             error.backward()
             self.optimizer.step()
+
+            if DEBUG_MODE:
+                print("Caption: ", captions.size())
+                print("Target: ", targets)
+                print("Output: ", output.argmax(dim = 1))
+                print("Chk: ", targets - outputs.argmax(dim = 1))
 
             error = error.data.item()
             sum_loss += error
@@ -87,7 +110,8 @@ class Trainer_RNN:
 
     def test(self):
         epoch = self.lr_scheduler.last_epoch + 1
-        self.my_model.eval()
+        self.encoder.eval()
+        self.decoder
 
         num_correct = 0
         fname_list = []
@@ -97,13 +121,22 @@ class Trainer_RNN:
         for idx, (fname, image, capt, length) in enumerate(tqdm_loader):
             images = image.to(torch.float).to(self.device)
             captions = capt.to(self.device)
-            with torch.autograd.no_grad():
-                output = self.my_model.sample(images)
+            # with torch.autograd.no_grad():
+            features = self.encoder(images)
+            # output = self.decoder(features, captions, length)
+            output = self.decoder.sample(features)
             fname_list.append(fname)
-            table[0:2, idx] = [output.argmax(), labels]
-            if labels == output.argmax():
-                num_correct += 1
-                table[2, idx] = 1
+            # print("Output: ", output)
+            # print("Ground Truth: ", capt)
+            # table[0:2, idx] = [output, labels]
+            cnt = 0
+            if captions.size() == output.size():
+                for i in range(captions.size(1)):
+                    if captions[0][i] == output[0][i]:
+                        cnt += 1
+                if cnt == captions.size(1):
+                    num_correct += 1
+                    
 
         print('In Epoch {}, Acc is {}'.format(epoch, num_correct/len(self.loader_test)))
         self.ckp.save_results(fname_list, table)

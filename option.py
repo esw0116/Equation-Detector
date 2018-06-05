@@ -54,3 +54,4 @@ letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
 
 tokens = ['<pad>', '<start>', '<end>', '<unk>']
 args.dictionary = list(tokens + sorted(specials+greeks+numbers+letters, key=len, reverse=True))
+# args.dictionary = list(sorted(specials+greeks+numbers+letters, key=len, reverse=True))
