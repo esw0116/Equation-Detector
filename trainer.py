@@ -96,7 +96,6 @@ class Trainer_CNN:
         table = np.zeros((3, len(self.loader_test)))
         correct_dic = {'Filename': [], 'GroundTruth': [], 'Prediction': [], 'Correct': []}
 
-
         tqdm_loader = tqdm.tqdm(self.loader_test)
         for idx, (fname, image, label) in enumerate(tqdm_loader):
             images = image.to(torch.float).to(self.device)

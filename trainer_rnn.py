@@ -7,7 +7,7 @@ from torch import optim
 import tqdm
 
 from optimizer import set_optimizer, set_scheduler
-from model import CRNN
+from model import EncoderCNN
 
 DEBUG_MODE = False
 
@@ -22,8 +22,8 @@ class Trainer_RNN:
         self.device = torch.device('cpu' if args.cpu_only else 'cuda')
 
         self.loss = nn.CrossEntropyLoss()
-        self.encoder = CRNN.make_encoder(args).to(self.device)
-        self.decoder = CRNN.make_decoder(args).to(self.device)
+        self.encoder = EncoderCNN.make_model(args).to(self.device)
+        self.decoder = self.my_model.to(self.device)
 
         # IF gradient only in RNN + linear layer:
         # self.params = list(self.decoder.parameters()) + list(self.encoder.linear.parameters()) + list(self.encoder.bn.parameters())
@@ -60,12 +60,7 @@ class Trainer_RNN:
                 self.optimizer.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'optimizer.pt')))
                 for _ in range(1, len(ckp.loss.result)):
                     self.lr_scheduler.step()
-        '''
-        if args.CNN_pre != '.':
-            print('Load CNN params...')
-            self.my_model.cnn.load_state_dict(torch.load(args.CNN_pre, **kwargs), strict=False)
-            print("Loaded CNN params!")
-        '''
+
 
     def train(self):
         lr_before = self.lr_scheduler.get_lr()[0]
@@ -144,7 +139,11 @@ class Trainer_RNN:
         if not self.args.test_only:
             cur_best = torch.max(self.ckp.loss.result).item()
             self.ckp.loss.register_result(num_correct/len(self.loader_test))
-            self.ckp.save(self, self.my_model, epoch, is_best=num_correct/len(self.loader_test) > cur_best)
+            best = num_correct/len(self.loader_test) > cur_best
+            self.ckp.save(self, self.my_model, epoch, is_best=best)
+            torch.save(model.state_dict(), os.path.join(self.log_dir, 'model', 'model_latest.pt'))
+            if is_best:
+                torch.save(model.state_dict(), os.path.join(self.log_dir, 'model', 'model_best.pt'))
 
     def termination(self):
         if self.args.test_only:

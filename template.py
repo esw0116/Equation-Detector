@@ -1,13 +1,17 @@
 def set_template(args):
 
     if args.template.find('SY') >= 0:
-        args.work_type = 'Character'
-        args.model = 'baseline'
-        args.batch_size = 128
-        args.num_epochs = 10
-        args.decay_step = 1
-        args.learning_rate = 2e-3
+        args.work_type = 'Expression'
+        args.model = 'CRNN'
+        args.cnn_model = 'resnet'
+        args.batch_size = 64
+        args.num_epochs = 50
+        args.learning_rate = 4e-3
+        args.decay_step = 5
         args.gamma = 0.5
+        args.embed_size = 512
+        args.hidden_size = 512
+        args.num_layers = 2
 
     elif args.template.find('DW') >= 0:
         args.work_type = 'Character'

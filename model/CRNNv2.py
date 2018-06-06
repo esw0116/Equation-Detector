@@ -1,16 +1,15 @@
 import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence
-from importlib import import_module
 
 
 def make_model(args):
-    return CRNN(args)
+    return CRNNv2(args)
 
 
-class CRNN(nn.Module):
+class CRNNv2(nn.Module):
     def __init__(self, args, max_seq_length=96):
-        super(CRNN, self).__init__()
+        super(CRNNv2, self).__init__()
         self.args = args
         lexicon_size = len(args.dictionary)
         self.embed = nn.Embedding(lexicon_size, args.embed_size)
@@ -18,14 +17,9 @@ class CRNN(nn.Module):
         self.linear = nn.Linear(args.hidden_size, lexicon_size)
         self.max_seq_length = max_seq_length
 
-    def forward(self, features, labels, lengths):
-        print(labels.size())
-        print(lengths)
-        embeddings = self.embed(labels)
-        print(embeddings.size())
-        print(features.unsqueeze(1).size())
-        input()
-        embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
+    def forward(self, features,  lengths):
+        features = features.unsqueeze(1)
+        embeddings = features.repeat(1, lengths[0], 1)
         packed = pack_padded_sequence(embeddings, lengths, batch_first = True)
         hiddens, _ = self.lstm(packed)
         outputs = self.linear(hiddens[0])
