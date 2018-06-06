@@ -31,7 +31,9 @@ class Trainer_RNN:
         self.params = list(self.decoder.parameters()) + list(self.encoder.parameters())
 
         # only train decoder
-        self.optimizer = optim.Adam(self.params, args.learning_rate)
+        self.optimizer = optim.Adam(self.params, args.learning_rate)        # ADAM
+        # self.optimizer = optim.SGD(self.params, args.learning_rate, momentum=0.8)   # SGD
+
         self.lr_scheduler = set_scheduler(args, self.optimizer)
 
         if args.cpu_only:
@@ -65,6 +67,10 @@ class Trainer_RNN:
             print("Loaded CNN params!")
         '''
 
+<<<<<<< HEAD
+        
+=======
+>>>>>>> 9507ca1fd84da3b245ddf28583c27d895dbc03f7
     def train(self):
         lr_before = self.lr_scheduler.get_lr()[0]
         self.lr_scheduler.step()

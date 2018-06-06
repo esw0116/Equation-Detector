@@ -30,10 +30,10 @@ def set_template(args):
     elif args.template.find('RNN') >= 0:
         args.work_type = 'Expression'
         args.model = 'CRNN'
-        args.batch_size = 32
-        args.num_epochs = 5
+        args.batch_size = 64
+        args.num_epochs = 50
         args.learning_rate = 4e-3
-        args.decay_step = 1
+        args.decay_step = 5
         args.gamma = 0.5
 
     elif args.template.find('test') >= 0:
