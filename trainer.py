@@ -94,6 +94,8 @@ class Trainer_CNN:
         num_correct = 0
         fname_list = []
         table = np.zeros((3, len(self.loader_test)))
+        correct_dic = {'Filename': [], 'GroundTruth': [], 'Prediction': [], 'Correct': []}
+
 
         tqdm_loader = tqdm.tqdm(self.loader_test)
         for idx, (fname, image, label) in enumerate(tqdm_loader):
@@ -104,12 +106,17 @@ class Trainer_CNN:
                 output = self.my_model(images)
             fname_list.append(fname)
             table[0:2, idx] = [output.argmax(), labels]
+            correct_dic['Filename'].append(fname)
+            correct_dic['GroundTruth'].append(labels.data.cpu().numpy())
+            correct_dic['Prediction'].append(output.argmax().data.cpu().numpy())
             if labels == output.argmax():
                 num_correct += 1
-                table[2, idx] = 1
+                correct_dic['Correct'].append(1)
+            else:
+                correct_dic['Correct'].append(0)
 
         print('In Epoch {}, Acc is {}'.format(epoch, num_correct/len(self.loader_test)))
-        self.ckp.save_results(fname_list, table)
+        self.ckp.save_results(correct_dic)
         if not self.args.test_only:
             cur_best = torch.max(self.ckp.loss.result).item()
             self.ckp.loss.register_result(num_correct/len(self.loader_test))

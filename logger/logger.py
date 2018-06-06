@@ -66,14 +66,9 @@ class logger:
         if is_best:
             torch.save(model.state_dict(), os.path.join(self.log_dir, 'model', 'model_best.pt'))
 
-    def save_results(self, fname, array):
-        column = ['Testdata', 'Prediction', 'Ground Truth', 'Correct?']
-        df = pd.DataFrame(columns=column)
-        df['Testdata'] = fname
-        df['Prediction'] = array[0]
-        df['Ground Truth'] = array[1]
-        df['Correct?'] = array[2]
-
+    def save_results(self, dictionary):
+        df = pd.DataFrame(dictionary)
+        df.set_index('Filename', inplace=True)
         df.to_csv(os.path.join(self.log_dir, 'result.csv'))
 
     def save_img(self, filename, img):

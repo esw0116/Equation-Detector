@@ -58,11 +58,12 @@ class Trainer_RNN:
                 self.optimizer.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'optimizer.pt')))
                 for _ in range(1, len(ckp.loss.result)):
                     self.lr_scheduler.step()
-
+        '''
         if args.CNN_pre != '.':
             print('Load CNN params...')
             self.my_model.cnn.load_state_dict(torch.load(args.CNN_pre, **kwargs), strict=False)
             print("Loaded CNN params!")
+        '''
 
     def train(self):
         lr_before = self.lr_scheduler.get_lr()[0]
@@ -99,47 +100,42 @@ class Trainer_RNN:
                 print("Output: ", outputs.argmax(dim=1))
                 print("Chk: ", targets - outputs.argmax(dim=1))
 
-            error = error.data.item()
+            error = error.item()
             sum_loss += error
+
+            tqdm_loader.set_description("Loss: {:.4f}, Lr: {:10.1e}".format(sum_loss/(idx%record_iter + 1), lr_after))
 
             if (idx + 1) % record_iter == 0:
                 self.ckp.loss.register_loss(sum_loss/record_iter)
                 sum_loss = 0
 
-            tqdm_loader.set_description("CLoss: {:.4f}, LR: {:10.1e}".format(error, lr_after))
-
     def test(self):
         epoch = self.lr_scheduler.last_epoch + 1
         self.encoder.eval()
-        self.decoder
 
         num_correct = 0
-        fname_list = []
-        table = np.zeros((3, len(self.loader_test)))
+        correct_dic = {'Filename': [], 'GroundTruth': [], 'Prediction': []}
 
-        tqdm_loader = tqdm.tqdm(self.loader_test)
+        tqdm_loader = tqdm.tqdm(self.loader_test, ncols=80)
         for idx, (fname, image, capt, length) in enumerate(tqdm_loader):
             images = image.to(torch.float).to(self.device)
             captions = capt.to(self.device)
-            # with torch.autograd.no_grad():
-            features = self.encoder(images)
-            # output = self.decoder(features, captions, length)
-            output = self.decoder.sample(features)
-            fname_list.append(fname)
+            with torch.autograd.no_grad():
+                features = self.encoder(images)
+                output = self.decoder.sample(features)
+
+            equation_gt = captions.cpu().numpy().squeeze(0)
+            equation_pred = output.cpu().numpy().squeeze(0)
+            correct_dic['Filename'].append(fname)
+            correct_dic['GroundTruth'].append(equation_gt)
+            correct_dic['Prediction'].append(equation_pred)
             # print("Output: ", output)
-            # print("Ground Truth: ", capt)
-            # table[0:2, idx] = [output, labels]
-            cnt = 0
-            if captions.size() == output.size():
-                for i in range(captions.size(1)):
-                    if captions[0][i] == output[0][i]:
-                        cnt += 1
-                if cnt == captions.size(1):
-                    num_correct += 1
-                    
+            # print("Ground Truth: ", equation_gt)
+            if np.array_equal(equation_gt, equation_pred):
+                num_correct += 1
 
         print('In Epoch {}, Acc is {}'.format(epoch, num_correct/len(self.loader_test)))
-        self.ckp.save_results(fname_list, table)
+        self.ckp.save_results(correct_dic)
         if not self.args.test_only:
             cur_best = torch.max(self.ckp.loss.result).item()
             self.ckp.loss.register_result(num_correct/len(self.loader_test))

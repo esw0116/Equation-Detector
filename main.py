@@ -8,7 +8,6 @@ from trainer_rnn import Trainer_RNN
 from model import model
 
 torch.manual_seed(args.seed)
-print(len(args.dictionary))
 checkpoint = logger.logger(args)
 dataloader = data(args)
 my_model = model(args, checkpoint)
