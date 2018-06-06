@@ -17,10 +17,10 @@ class Trainer_CNN:
         self.my_model.reset()
         self.loader_train, self.loader_test = loader
         self.device = torch.device('cpu' if args.cpu_only else 'cuda')
-
         self.optimizer = optim.Adam(self.my_model.parameters(), args.learning_rate)
         # set_optimizer(args, self.my_model)
         self.lr_scheduler = set_scheduler(args, self.optimizer)
+
         if args.load_path != '.':
             if args.cpu_only:
                 kwargs = {'map_location': lambda storage, loc: storage}
@@ -40,10 +40,12 @@ class Trainer_CNN:
                     print('Load model from : {}'.format(os.path.join(ckp.log_dir, 'model', 'model_best.pt')))
                     self.my_model.load_state_dict(
                         torch.load(os.path.join(ckp.log_dir, 'model', 'model_best.pt'), **kwargs),
-                        strict=False)
-            self.optimizer.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'optimizer.pt')))
-            for _ in range(1, len(ckp.loss.result)):
-                self.lr_scheduler.step()
+                        strict=True)
+
+            if not self.args.test_only:
+                self.optimizer.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'optimizer.pt')))
+                for _ in range(1, len(ckp.loss.result)):
+                    self.lr_scheduler.step()
 
         self.loss = nn.CrossEntropyLoss()
 

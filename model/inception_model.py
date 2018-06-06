@@ -183,7 +183,6 @@ class BasicConv(nn.Module):
         return x
 
     def reset(self):
-        print('C')
         for m in self.children():
             if isinstance(m, nn.Conv2d):
                 print('!')
