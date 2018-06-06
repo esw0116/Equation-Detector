@@ -8,7 +8,7 @@ def make_model(args):
     return CRNN(args)
 
 def make_decoder(args):
-    return CRNN(args, 512)
+    return CRNN(args)
 
 def make_encoder(args):
     return EncoderCNN(args)
@@ -18,7 +18,7 @@ def make_encoder(args):
 class EncoderCNN(nn.Module):
     def __init__(self, args):
         super(EncoderCNN, self).__init__()
-
+        self.args = args
         cnn_model = import_module('model.'+args.cnn_model)
         my_model = cnn_model.make_model(args)
         my_model.reset()
@@ -31,8 +31,8 @@ class EncoderCNN(nn.Module):
         modules = list(my_model.children())[:-1]
 
         self.my_model = nn.Sequential(*modules)
-        self.linear = nn.Linear(15*3*128, 512)
-        self.bn = nn.BatchNorm1d(512, momentum=0.01)
+        self.linear = nn.Linear(15*3*128, self.args.embed_size)
+        self.bn = nn.BatchNorm1d(self.args.embed_size, momentum=0.01)
     
     def forward(self, x):
         if not self.args.fine_tune:
@@ -68,7 +68,7 @@ class CRNN(nn.Module):
         # print(input())
         # print(embeddings.size())
         packed = pack_padded_sequence(embeddings, lengths, batch_first = True)
-        hiddens, _ = self.bilstm(packed)
+        hiddens, _ = self.lstm(packed)
         outputs = self.linear(hiddens[0])
         return outputs
 
@@ -76,7 +76,7 @@ class CRNN(nn.Module):
         sampled_idx = []
         inputs = features.unsqueeze(1)
         for i in range(self.max_seq_length):
-            hiddens, states = self.bilstm(inputs, states)
+            hiddens, states = self.lstm(inputs, states)
             outputs = self.linear(hiddens.squeeze(1))
             _, predicted = outputs.max(1)
             sampled_idx.append(predicted)

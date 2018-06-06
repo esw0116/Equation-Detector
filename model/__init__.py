@@ -15,7 +15,7 @@ class model:
         self.device = torch.device('cpu' if args.cpu_only else 'cuda')
         self.module = import_module('model.'+args.model)
         self.model = self.module.make_model(args).to(self.device)
-
+        print("Model made!")
         if not args.cpu_only and self.args.n_GPUs > 1:
             self.model = nn.DataParallel(self.model, range(args.n_GPUs))
 

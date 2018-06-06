@@ -26,9 +26,12 @@ class Trainer_RNN:
         self.decoder = CRNN.make_decoder(args).to(self.device)
 
         # IF gradient only in RNN + linear layer:
-        # self.params = list(self.decoder.parameters()) + list(self.encoder.linear.parameters()) + list(self.encoder.bn.parameters())
-        # ELSE:
-        self.params = list(self.decoder.parameters()) + list(self.encoder.parameters())
+        if not self.args.fine_tune:
+            print("Not fine tuning CNN")
+            self.params = list(self.decoder.parameters()) + list(self.encoder.linear.parameters()) + list(self.encoder.bn.parameters())
+        else:
+            print("Fine tuning CNN")
+            self.params = list(self.decoder.parameters()) + list(self.encoder.parameters())
 
         # only train decoder
         self.optimizer = optim.Adam(self.params, args.learning_rate)        # ADAM
@@ -66,6 +69,7 @@ class Trainer_RNN:
             self.my_model.cnn.load_state_dict(torch.load(args.CNN_pre, **kwargs), strict=False)
             print("Loaded CNN params!")
         '''
+        self.device = torch.device('cpu' if args.cpu_only else 'cuda')
 
     def train(self):
         lr_before = self.lr_scheduler.get_lr()[0]

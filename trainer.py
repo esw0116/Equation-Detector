@@ -14,6 +14,7 @@ class Trainer_CNN:
         self.ckp = ckp
         self.model = model
         self.my_model = self.model.get_model()
+
         self.my_model.reset()
         self.loader_train, self.loader_test = loader
         self.device = torch.device('cpu' if args.cpu_only else 'cuda')
