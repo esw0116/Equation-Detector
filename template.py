@@ -2,7 +2,7 @@ def set_template(args):
 
     if args.template.find('SY') >= 0:
         args.work_type = 'Expression'
-        args.model = 'CRNN'
+        args.model = 'CRNNv2'
         args.cnn_model = 'resnet'
         args.batch_size = 64
         args.num_epochs = 50
@@ -11,7 +11,7 @@ def set_template(args):
         args.gamma = 0.5
         args.embed_size = 512
         args.hidden_size = 512
-        args.num_layers = 2
+        args.num_layers = 1
 
     elif args.template.find('DW') >= 0:
         args.work_type = 'Character'

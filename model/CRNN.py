@@ -19,14 +19,9 @@ class CRNN(nn.Module):
         self.max_seq_length = max_seq_length
 
     def forward(self, features, labels, lengths):
-        print(labels.size())
-        print(lengths)
         embeddings = self.embed(labels)
-        print(embeddings.size())
-        print(features.unsqueeze(1).size())
-        input()
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
-        packed = pack_padded_sequence(embeddings, lengths, batch_first = True)
+        packed = pack_padded_sequence(embeddings, lengths, batch_first=True)
         hiddens, _ = self.lstm(packed)
         outputs = self.linear(hiddens[0])
         return outputs

@@ -61,7 +61,6 @@ class Trainer_RNN:
                 for _ in range(1, len(ckp.loss.result)):
                     self.lr_scheduler.step()
 
-
     def train(self):
         lr_before = self.lr_scheduler.get_lr()[0]
         self.lr_scheduler.step()
@@ -141,9 +140,9 @@ class Trainer_RNN:
             self.ckp.loss.register_result(num_correct/len(self.loader_test))
             best = num_correct/len(self.loader_test) > cur_best
             self.ckp.save(self, self.my_model, epoch, is_best=best)
-            torch.save(model.state_dict(), os.path.join(self.log_dir, 'model', 'model_latest.pt'))
-            if is_best:
-                torch.save(model.state_dict(), os.path.join(self.log_dir, 'model', 'model_best.pt'))
+            torch.save(self.encoder.state_dict(), os.path.join(self.ckp.log_dir, 'model', 'model_enc_latest.pt'))
+            if best:
+                torch.save(self.encoder.state_dict(), os.path.join(self.ckp.log_dir, 'model', 'model_enc_best.pt'))
 
     def termination(self):
         if self.args.test_only:

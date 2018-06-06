@@ -5,7 +5,7 @@ from torch.nn.utils.rnn import pack_padded_sequence
 
 def make_model(args):
     return CRNNv2(args)
-# CNN Features and Characeters
+
 
 class CRNNv2(nn.Module):
     def __init__(self, args, max_seq_length=96):
