@@ -21,11 +21,12 @@ def make_encoder(args):
 class EncoderCNN(nn.Module):
     def __init__(self, args):
         super(EncoderCNN, self).__init__()
-        my_model = baseline.make_model(args)
+        # my_model = baseline.make_model(args)
+        my_model = resnet.make_model(args)
         my_model.reset()
         
         print("Loading Model!")
-        my_model.load_state_dict(torch.load('./experiment/20180603_baseline_001/model/model_best.pt'), strict=False)
+        my_model.load_state_dict(torch.load('./CNN_Pretrained/resnet.pt'), strict=False)
         # print("Parameters: ", my_model.parameters.data)
         # for param in my_model.parameters():
         #     print(param.data)

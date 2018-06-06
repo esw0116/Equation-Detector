@@ -68,8 +68,6 @@ class ResNet(nn.Module):
         self.layer4 = self.make_layer(block, 512, layers[3], stride = 2)
         self.conv2 = BasicConv(512, 128, kernel_size = 1)
         
-        self.fc1 = nn.Linear(5760, 118)
-
     
     def make_layer(self, block, planes, blocks, stride = 1):
         downsample = None
