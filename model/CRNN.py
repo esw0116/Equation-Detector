@@ -1,17 +1,14 @@
 import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence
-import os
-
-from model import resnet
-from model import baseline
+from importlib import import_module
 
 
 def make_model(args):
-    return CRNN(args, 512, 512, 122, 2)
+    return CRNN(args)
 
 def make_decoder(args):
-    return CRNN(args, 512, 512, 122, 2)
+    return CRNN(args, 512)
 
 def make_encoder(args):
     return EncoderCNN(args)
@@ -21,44 +18,45 @@ def make_encoder(args):
 class EncoderCNN(nn.Module):
     def __init__(self, args):
         super(EncoderCNN, self).__init__()
-        # my_model = baseline.make_model(args)
-        my_model = resnet.make_model(args)
+
+        cnn_model = import_module('model.'+args.cnn_model)
+        my_model = cnn_model.make_model(args)
         my_model.reset()
         
-        print("Loading Model!")
-        my_model.load_state_dict(torch.load('./CNN_Pretrained/resnet.pt'), strict=False)
-        # print("Parameters: ", my_model.parameters.data)
-        # for param in my_model.parameters():
-        #     print(param.data)
+        print("Loading CNN({}) Model!".format(args.cnn_model))
+        my_model.load_state_dict(torch.load('./CNN_Pretrained/{}.pt'.format(args.cnn_model)), strict=False)
         print("Model Loaded!")  
         
         # delete Fully Connected layer
         modules = list(my_model.children())[:-1]
 
         self.my_model = nn.Sequential(*modules)
-        # for params in self.my_model.parameters():
-        #     print(params.data)
         self.linear = nn.Linear(15*3*128, 512)
-        self.bn = nn.BatchNorm1d(512, momentum = 0.01)
+        self.bn = nn.BatchNorm1d(512, momentum=0.01)
     
     def forward(self, x):
-        # with torch.no_grad():       ## remove if fine tuning
-        features = self.my_model(x)
-        #flatten for RNN Input
+        if not self.args.fine_tune:
+            with torch.no_grad():
+                features = self.my_model(x)
+        else:
+            features = self.my_model(x)
         features = features.reshape(features.size(0), -1)
         features = self.bn(self.linear(features))
+
         return features
-    def reset():
+
+    def reset(self):
         return
 
 class CRNN(nn.Module):
 
-    def __init__(self, args, embed_size, hidden_size, lexicon_size, num_layers, max_seq_length=96):
+    def __init__(self, args, max_seq_length=96):
         super(CRNN, self).__init__()
-        self.embed = nn.Embedding(lexicon_size, embed_size)
-        # num layers can be 1 or 2
-        self.bilstm = nn.LSTM(embed_size, hidden_size, num_layers, bidirectional=False, batch_first = True)
-        self.linear = nn.Linear(hidden_size, lexicon_size)
+        self.args = args
+        lexicon_size = len(args.dictionary)
+        self.embed = nn.Embedding(lexicon_size, args.embed_size)
+        self.lstm = nn.LSTM(args.embed_size, args.hidden_size, args.num_layers, bidirectional=False, batch_first=True)
+        self.linear = nn.Linear(args.hidden_size, lexicon_size)
         self.max_seq_length = max_seq_length
 
     def forward(self, features, labels, lengths):
@@ -84,7 +82,7 @@ class CRNN(nn.Module):
             sampled_idx.append(predicted)
             inputs = self.embed(predicted)
             inputs = inputs.unsqueeze(1)
-            if predicted==2:
+            if predicted == 2:
                 break
         sampled_idx = torch.stack(sampled_idx, 1)
         return sampled_idx

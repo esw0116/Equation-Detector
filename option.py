@@ -16,19 +16,24 @@ parser.add_argument('--seed', type=int, default=1, help='random seed')
 
 # Set Load Path, Save Path
 parser.add_argument('--data_path', type=str, default='./Dataset', help='path of input data')
-parser.add_argument('--save_path', type=str, default='../../Feature_map', help='path of saving image directory')
-
 parser.add_argument('--test_only', action='store_true', help='test only mode')
 parser.add_argument('--load_path', type=str, default='.', help='load path')
 parser.add_argument('--CNN_pre', type=str, default='.', help='load path of CNN model when training RNN')
 parser.add_argument('--log_dir', type=str, default='./experiment', help='path of pre_trained data')
 
+# Set the hyperparams about learning
 parser.add_argument('--batch_size', type=int, default=256, help='input batch size for training')
 parser.add_argument('--num_epochs', type=int, default=5, help='Number of batches to run')
-
 parser.add_argument('--learning_rate', type=float, default=0.01, help='Base learning rate for Adam')
 parser.add_argument('--decay_step', type=int, default=2000, help='Lr decay Step')
 parser.add_argument('--gamma', type=float, default=0.5, help='Lr decay gamma')
+
+# Set the hyperparams of LSTM
+parser.add_argument('--cnn_model', type=str, default='baseline', help='model of CNN')
+parser.add_argument('--fine_tune', action='store_false', help='True if fine_tuning')
+parser.add_argument('--embed_size', type=int, default=256, help='Dimension of embedding vector')
+parser.add_argument('--hidden_size', type=int, default=512, help='Dimension of hidden state')
+parser.add_argument('--num_layers', type=int, default=1, help='number of layers in LSTM')
 
 parser.add_argument('--model', type=str, default='baseline', help='Name of model')
 parser.add_argument('--print_model', action='store_true', help='print model')

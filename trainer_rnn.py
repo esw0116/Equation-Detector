@@ -67,10 +67,6 @@ class Trainer_RNN:
             print("Loaded CNN params!")
         '''
 
-<<<<<<< HEAD
-        
-=======
->>>>>>> 9507ca1fd84da3b245ddf28583c27d895dbc03f7
     def train(self):
         lr_before = self.lr_scheduler.get_lr()[0]
         self.lr_scheduler.step()
@@ -120,7 +116,7 @@ class Trainer_RNN:
         self.encoder.eval()
 
         num_correct = 0
-        correct_dic = {'Filename': [], 'GroundTruth': [], 'Prediction': []}
+        correct_dic = {'Filename': [], 'GroundTruth': [], 'Prediction': [], 'Correct':[]}
 
         tqdm_loader = tqdm.tqdm(self.loader_test, ncols=80)
         for idx, (fname, image, capt, length) in enumerate(tqdm_loader):
@@ -139,6 +135,9 @@ class Trainer_RNN:
             # print("Ground Truth: ", equation_gt)
             if np.array_equal(equation_gt, equation_pred):
                 num_correct += 1
+                correct_dic['Correct'].append(1)
+            else:
+                correct_dic['Correct'].append(0)
 
         print('In Epoch {}, Acc is {}'.format(epoch, num_correct/len(self.loader_test)))
         self.ckp.save_results(correct_dic)
