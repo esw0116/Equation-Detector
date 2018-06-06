@@ -53,16 +53,16 @@ class Trainer_RNN:
                     self.my_model.load_state_dict(
                         torch.load(os.path.join(ckp.log_dir, 'model', 'model_best.pt'), **kwargs),
                         strict=False)
-            self.optimizer.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'optimizer.pt')))
-            for _ in range(1, len(ckp.loss.result)):
-                self.lr_scheduler.step()
+
+            if not self.args.test_only:
+                self.optimizer.load_state_dict(torch.load(os.path.join(ckp.log_dir, 'optimizer.pt')))
+                for _ in range(1, len(ckp.loss.result)):
+                    self.lr_scheduler.step()
 
         if args.CNN_pre != '.':
             print('Load CNN params...')
             self.my_model.cnn.load_state_dict(torch.load(args.CNN_pre, **kwargs), strict=False)
             print("Loaded CNN params!")
-
-        
 
     def train(self):
         lr_before = self.lr_scheduler.get_lr()[0]
@@ -96,8 +96,8 @@ class Trainer_RNN:
             if DEBUG_MODE:
                 print("Caption: ", captions.size())
                 print("Target: ", targets)
-                print("Output: ", output.argmax(dim = 1))
-                print("Chk: ", targets - outputs.argmax(dim = 1))
+                print("Output: ", outputs.argmax(dim=1))
+                print("Chk: ", targets - outputs.argmax(dim=1))
 
             error = error.data.item()
             sum_loss += error

@@ -34,7 +34,6 @@ class EncoderCNN(nn.Module):
         # delete Fully Connected layer
         modules = list(my_model.children())[:-1]
 
-
         self.my_model = nn.Sequential(*modules)
         # for params in self.my_model.parameters():
         #     print(params.data)

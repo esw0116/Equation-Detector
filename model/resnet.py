@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as f
-import numpy as np
+
 
 def make_model(args):
     return ResNet(BasicBlock, [3, 4, 6, 3])
@@ -102,21 +102,3 @@ class ResNet(nn.Module):
     
     def reset(self):
         return
-
-
-
-
-class resnet34(nn.Module):
-    def __init__(self, args):
-        super(resnet34, self).__init__()
-        self.model = ResNet(BasicBlock, [3, 4, 6, 3])
-
-    def forward(self, x):
-        x = self.model(x)
-        return x
-
-    def reset(self):
-        return
-
-    def state_dict(self, **kwargs):
-        return self.model.state_dict(**kwargs)
