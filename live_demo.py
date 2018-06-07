@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-import imageio
+import cv2
 from model import EncoderCNN
 from model import CRNNv2
 from option import args
@@ -19,11 +19,15 @@ print("Model Loaded")
 
 #read image
 img = np.zeros((1,96,480))
-img_read = imageio.imread('04031.png')
+img_read = cv2.imread('trial.png',0)
+img_read = cv2.resize(img_read, (480, 96), interpolation = cv2.INTER_NEAREST)
+img_read[img_read>100]=255
+cv2.imwrite('input_img.png',img_read)
+
 img_read = common.normalize_img(img_read)
 print(img_read.shape)
 img_read_expanded = np.expand_dims(img_read, axis=0)
-img[:, 8:-8, 16:-16] = img_read_expanded
+img = img_read_expanded
 img = np.expand_dims(img, axis=0)
 
 # Input image into network
