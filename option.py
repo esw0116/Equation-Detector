@@ -18,7 +18,6 @@ parser.add_argument('--seed', type=int, default=1, help='random seed')
 parser.add_argument('--data_path', type=str, default='./Dataset', help='path of input data')
 parser.add_argument('--test_only', action='store_true', help='test only mode')
 parser.add_argument('--load_path', type=str, default='.', help='load path')
-parser.add_argument('--CNN_pre', type=str, default='.', help='load path of CNN model when training RNN')
 parser.add_argument('--log_dir', type=str, default='./experiment', help='path of pre_trained data')
 
 # Set the hyperparams about learning

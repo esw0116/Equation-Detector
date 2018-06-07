@@ -10,6 +10,7 @@ def make_model(args):
 def make_model_34(args):
     return ResNet(BasicBlock, [3,4,6,3])
 
+
 class BasicConv(nn.Module):
 
     def __init__(self, in_channels, out_channels, **kwargs):
@@ -32,10 +33,10 @@ class BasicBlock(nn.Module):
     
     def __init__(self, in_channels, out_channels, stride = 1, downsample=None, **kwargs):
         super(BasicBlock, self).__init__()
-        self.conv1 = BasicConv(in_channels, out_channels, kernel_size = 3, stride = stride, padding = 1)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1)
         self.bn1 = nn.BatchNorm2d(out_channels)
         self.relu = nn.ReLU(inplace=True)
-        self.conv2 = BasicConv(out_channels, out_channels, kernel_size = 3, padding = 1)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
         self.bn2 = nn.BatchNorm2d(out_channels)
         self.downsample = downsample
         self.stride = stride
@@ -103,10 +104,7 @@ class ResNet(nn.Module):
         self.layer2 = self.make_layer(block, 128, layers[1], stride = 2)
         self.layer3 = self.make_layer(block, 256, layers[2], stride = 2)
         self.layer4 = self.make_layer(block, 512, layers[3], stride = 2)
-        self.conv2 = BasicConv(512*block.expansion, 128, kernel_size = 1)
-        self.bn2 = nn.BatchNorm2d(128)
-        
-
+        self.conv2 = BasicConv(512, 128, kernel_size = 1)
         self.fc1 = nn.Linear(5760, 118)
         
     
