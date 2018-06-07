@@ -10,7 +10,7 @@ parser.add_argument('--work_type', type=str, default='Character', help='CNN/RNN'
 
 # Set GPU environment, Random Seed for Reproducing
 parser.add_argument('--n_threads', type=int, default=2, help='number of threads for data loading')
-parser.add_argument('--cpu_only', action='store_true', help='enables CUDA training')
+parser.add_argument('--cpu_only', type=bool, default = True, help='enables CUDA training')
 parser.add_argument('--n_GPUs', type=int, default=1, help='number of GPUs')
 parser.add_argument('--seed', type=int, default=1, help='random seed')
 
@@ -28,10 +28,10 @@ parser.add_argument('--decay_step', type=int, default=2000, help='Lr decay Step'
 parser.add_argument('--gamma', type=float, default=0.5, help='Lr decay gamma')
 
 # Set the hyperparams of LSTM
-parser.add_argument('--cnn_model', type=str, default='baseline', help='model of CNN')
+parser.add_argument('--cnn_model', type=str, default='resnet', help='model of CNN')
 parser.add_argument('--fine_tune', action='store_false', help='True if fine_tuning')
-parser.add_argument('--embed_size', type=int, default=256, help='Dimension of embedding vector')
-parser.add_argument('--hidden_size', type=int, default=512, help='Dimension of hidden state')
+parser.add_argument('--embed_size', type=int, default=1024, help='Dimension of embedding vector')
+parser.add_argument('--hidden_size', type=int, default=1024, help='Dimension of hidden state')
 parser.add_argument('--num_layers', type=int, default=1, help='number of layers in LSTM')
 
 parser.add_argument('--model', type=str, default='baseline', help='Name of model')

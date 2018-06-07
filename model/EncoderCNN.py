@@ -15,9 +15,9 @@ class EncoderCNN(nn.Module):
         my_model = cnn_model.make_model(args)
         my_model.reset()
 
-        print("Loading CNN({}) Model!".format(args.cnn_model))
-        my_model.load_state_dict(torch.load('./CNN_Pretrained/{}.pt'.format(args.cnn_model)), strict=False)
-        print("Model Loaded!")
+        # print("Loading CNN({}) Model!".format(args.cnn_model))
+        # my_model.load_state_dict(torch.load('./CNN_Pretrained/{}.pt'.format(args.cnn_model)), strict=False)
+        # print("Model Loaded!")
 
         # delete Fully Connected layer
         modules = list(my_model.children())[:-1]
